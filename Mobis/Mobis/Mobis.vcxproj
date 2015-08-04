@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6F3FF0D6-52E9-4A78-8E2B-B9B37D4C70F1}</ProjectGuid>
+    <RootNamespace>Mobis</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\opencv3\opencv\build\include;D:\opencv3\opencv\build\include\opencv;D:\opencv3\opencv\build\include\opencv2;$(JAI_SDK_INCLUDE);$(IncludePath)</IncludePath>
+    <LibraryPath>D:\opencv3\opencv\build\x86\vc11\lib;$(JAI_SDK_LIB);$(LibraryPath)</LibraryPath>
+    <TargetName>MobisCheck</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\opencv3\opencv\build\include;D:\opencv3\opencv\build\include\opencv;D:\opencv3\opencv\build\include\opencv2;$(JAI_SDK_INCLUDE);$(IncludePath)</IncludePath>
+    <LibraryPath>D:\opencv3\opencv\build\x86\vc11\lib;$(JAI_SDK_LIB);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opencv_ts300d.lib;opencv_world300d.lib;Jai_Factory.lib</AdditionalDependencies>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opencv_ts300.lib;opencv_world300.lib;Jai_Factory.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AddModelDlg.h" />
+    <ClInclude Include="LeoPicture_For_AddModel.h" />
+    <ClInclude Include="algorithm.h" />
+    <ClInclude Include="cameraManage.h" />
+    <ClInclude Include="CameraSetting.h" />
+    <ClInclude Include="camera_jai.h" />
+    <ClInclude Include="CMSComm.h" />
+    <ClInclude Include="CvvImage.h" />
+    <ClInclude Include="ExtPicture.h" />
+    <ClInclude Include="LeoPicture.h" />
+    <ClInclude Include="LeoRectTracker.h" />
+    <ClInclude Include="LoadDlg.h" />
+    <ClInclude Include="LoadManage.h" />
+    <ClInclude Include="LeoPicture_For_Main.h" />
+    <ClInclude Include="Mobis.h" />
+    <ClInclude Include="MobisDlg.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="PictureSave.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="selectDialog.h" />
+    <ClInclude Include="sheet_CameraSetPage.h" />
+    <ClInclude Include="sheet_DatabaseSetPage.h" />
+    <ClInclude Include="sheet_LightSetPage.h" />
+    <ClInclude Include="sheet_Seting.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="types.h" />
+    <ClInclude Include="LeoPicture_For_SelectDlg.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AddModelDlg.cpp" />
+    <ClCompile Include="LeoPicture_For_AddModel.cpp" />
+    <ClCompile Include="algorithm.cpp" />
+    <ClCompile Include="cameraManage.cpp" />
+    <ClCompile Include="CameraSetting.cpp" />
+    <ClCompile Include="camera_jai.cpp" />
+    <ClCompile Include="CMSComm.cpp" />
+    <ClCompile Include="CvvImage.cpp" />
+    <ClCompile Include="ExtPicture.cpp" />
+    <ClCompile Include="LeoPicture.cpp" />
+    <ClCompile Include="LeoRectTracker.cpp" />
+    <ClCompile Include="LoadDlg.cpp" />
+    <ClCompile Include="LoadManage.cpp" />
+    <ClCompile Include="LeoPicture_For_Main.cpp" />
+    <ClCompile Include="Mobis.cpp" />
+    <ClCompile Include="MobisDlg.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PictureSave.cpp" />
+    <ClCompile Include="selectDialog.cpp" />
+    <ClCompile Include="sheet_CameraSetPage.cpp" />
+    <ClCompile Include="sheet_DatabaseSetPage.cpp" />
+    <ClCompile Include="sheet_LightSetPage.cpp" />
+    <ClCompile Include="sheet_Seting.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="LeoPicture_For_SelectDlg.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Mobis.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Mobis.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Debug\no.bmp" />
+    <Image Include="res\check.ico" />
+    <Image Include="res\icon1.ico" />
+    <Image Include="res\Mobis.ico" />
+    <Image Include="res\tip.ico" />
+    <Image Include="res\tree.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Mobis.rc" _x007B_648A5600-2C6E-101B-82B6-000000000014_x007D_="CMSComm" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

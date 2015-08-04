@@ -1,0 +1,1 @@
+#define WM_DATA_READY WM_USER+1011
