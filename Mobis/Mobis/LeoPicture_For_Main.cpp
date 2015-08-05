@@ -14,7 +14,8 @@ LeoPicture_For_Main::~LeoPicture_For_Main(void)
 
 void LeoPicture_For_Main::Draw(CDC *pDC)
 {
-
+	if (m_img.empty())
+		return;
 
 	cv::Mat showMat=m_img.clone();
 	if(p_ModelManage!=NULL)

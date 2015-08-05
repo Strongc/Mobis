@@ -15,7 +15,7 @@ LeoPicture::LeoPicture(void)
 
 LeoPicture::~LeoPicture(void)
 {
-	
+
 }
 
 //---------------------------------------------------------------------
@@ -194,6 +194,10 @@ int LeoPicture::OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message)
 
 void LeoPicture::Draw(CDC *pDC)
 {
+	if (m_img.empty())
+		return;
+
+
 	cv::Mat showMat=m_img.clone();
 	cv::Mat showImage(showMat,RectRoi); //获取需展现图像
 
@@ -263,4 +267,17 @@ void LeoPicture::UpdateImage(cv::Mat image)
 	}
 	Invalidate();
 }
+
+
+LeoPicture & LeoPicture::operator = (LeoPicture & other)
+{
+	return *this;
+}
+
+//拷贝构造函数  
+LeoPicture::LeoPicture(const LeoPicture& other)  
+{  
+	;
+}  
+
 

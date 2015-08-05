@@ -8,7 +8,7 @@
 
 
 
-int g_CamNum =1;
+int g_CamNum =2;
 std::vector<CRITICAL_SECTION>  g_CamBufs(g_CamNum);  //´úÂëÁÙ½çÇø 
 std::vector<HANDLE> g_CamAcqs(g_CamNum);
 std::vector<HANDLE> g_ReadyChecks(g_CamNum);

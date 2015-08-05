@@ -36,11 +36,14 @@ protected:
 public:
 
 	//整体大图控件及变量
-	LeoPicture_For_Main m_zoomPic;
-	Mat workPool_img;
+	//LeoPicture_For_Main m_zoomPic;
+	//Mat workPool_img;
 
-	LeoPicture_For_Main m_zoomPic2;
-	Mat workPool_img2;
+	//LeoPicture_For_Main m_zoomPic2;
+	//Mat workPool_img2;
+
+	vector<LeoPicture_For_Main>m_zoomPics;
+	vector<Mat> workPool_imgs;
 	//区域图，状态结果的控件及图像变量
 	CStatic m_pics[20];
 	CStatic m_status[20];
@@ -55,6 +58,14 @@ public:
 	ModelManage CurrentXinghao;
 
 	//线程使用	
+	typedef struct point_and_camID_  
+	{  
+		void* Point;
+		int camID;  
+	}point_and_camID;
+	vector<point_and_camID> point_and_camIDs;
+
+
 	HANDLE m_hAcqEvent;
 	HANDLE m_hAcqThread;
 
@@ -65,12 +76,7 @@ public:
 	HANDLE m_hCheckThread;
 
 
-	typedef struct point_and_camID_  
-	{  
-		void* Point;
-		int camID;  
-	}point_and_camID;
-	vector<point_and_camID> point_and_camIDs;
+
 
 	//相机管理对象
 	cameraManage m_cameraManage;
@@ -113,10 +119,10 @@ public:
 
 
 	//一些测试按钮////////////////////////////////////////////
-	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButton2();    
-	afx_msg void OnBnClickedButton3();
-	afx_msg void OnBnClickedButton4();
+	//afx_msg void OnBnClickedButton1();
+	//afx_msg void OnBnClickedButton2();    
+	//afx_msg void OnBnClickedButton3();
+	//afx_msg void OnBnClickedButton4();
 
 
 	afx_msg void OnBnClickedstarttest();

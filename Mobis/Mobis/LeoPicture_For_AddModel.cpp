@@ -19,11 +19,14 @@ LeoPicture_For_AddModel::LeoPicture_For_AddModel()
 //---------------------------------------------------------------------
 LeoPicture_For_AddModel::~LeoPicture_For_AddModel()
 {
-	
+
 }
 
 void LeoPicture_For_AddModel::Draw(CDC *pDC)
 {
+	if (m_img.empty())
+		return;
+
 	cv::Mat showMat=m_img.clone();
 	//for (int i = 0; i < ptr_models.size(); i++)
 	//{

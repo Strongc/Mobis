@@ -13,6 +13,9 @@ LeoPicture_For_SelectDlg::~LeoPicture_For_SelectDlg()
 
 void LeoPicture_For_SelectDlg::Draw(CDC *pDC)
 {
+	if (m_img.empty())
+		return;
+
 	cv::Mat showMat=m_img.clone();
 	for (int i = 0; i < models.size(); i++)
 	{

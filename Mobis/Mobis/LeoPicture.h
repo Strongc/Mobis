@@ -30,10 +30,12 @@ public:
 	cv::Point			ClientToImage(CPoint &pt);
 	cv::Point			ImageToClient(cv::Point &pt);
 
-
-	
 	cv::Mat  m_img;
 	cv::Rect RectRoi;
 	LeoRectTracker		*m_RectTracker;
+
+
+	LeoPicture & operator = (LeoPicture & other);
+	LeoPicture(const LeoPicture& other) ; 
 };
 

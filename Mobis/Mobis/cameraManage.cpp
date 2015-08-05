@@ -131,7 +131,7 @@ bool cameraManage::findCamera()
 
 bool cameraManage::allocationCameraConnect()
 {
-	if(m_cameraIDList.size()>=1)
+	if(m_cameraIDList.size()==1||m_cameraIDList.size()==2)
 	{
 		//camera_jai camera1;
 		//m_cameraList.push_back(camera1);
@@ -141,12 +141,32 @@ bool cameraManage::allocationCameraConnect()
 
 		m_cameraList[0].setParam(m_hFactory,m_cameraIDList[0],pWnd,ContinuousTrig,0);
 		m_cameraList[0].open();	
+
+
+
 		//if(m_cameraIDList.size()>=4)
 		//{
-		//	m_cameraList[1].setParam(m_hFactory,m_cameraIDList[3],pWnd,ContinuousTrig,1);
+		//	m_cameraList[1].setParam(m_hFactory,m_cameraIDList[2],pWnd,ContinuousTrig,1);
 		//	m_cameraList[1].open();	
 		//}
 	}
+	else if(m_cameraIDList.size()==4)
+	{
+		m_cameraList.resize(2);
+		CWnd *pWnd=CWnd::FindWindow(NULL,_T(" 螺丝检测"));//获取目标窗口
+
+		m_cameraList[0].setParam(m_hFactory,m_cameraIDList[0],pWnd,ContinuousTrig,0);
+		m_cameraList[0].open();	
+
+
+
+
+		m_cameraList[1].setParam(m_hFactory,m_cameraIDList[1],pWnd,ContinuousTrig,1);
+		m_cameraList[1].open();	
+
+	}
+
+
 	return true;
 }
 

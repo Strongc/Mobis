@@ -46,14 +46,25 @@ END_MESSAGE_MAP()
 CMobisDlg::CMobisDlg(CWnd* pParent /*=NULL*/): CDialogEx(CMobisDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_CHECK);
+
+
+	int ctrNum=2;
+	m_zoomPics.resize(ctrNum);
+	workPool_imgs.resize(ctrNum);
+
 }
 
 void CMobisDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_list, m_list_all);
-	DDX_Control(pDX, IDC_IMG,  m_zoomPic);
-	DDX_Control(pDX, IDC_IMG2, m_zoomPic2);
+	//for (int i = 0; i < m_zoomPics.size(); i++)
+	//{
+	//	DDX_Control(pDX, IDC_IMG+i,m_zoomPics[i]);  //这种做法限制比较大  所以图像显都示控件的ID如IDC_IMG，必须连续增加。
+	//}
+	DDX_Control(pDX, IDC_IMG,m_zoomPics[0]);
+	DDX_Control(pDX, IDC_IMG2,m_zoomPics[1]);
+	//DDX_Control(pDX, IDC_IMG2, m_zoomPic2);
 
 	DDX_Control(pDX, IDC_PIC1, m_pics[0]);
 	DDX_Control(pDX, IDC_PIC2, m_pics[1]);
@@ -111,10 +122,10 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_list, &CMobisDlg::OnSelchangeList)
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BUTTON1, &CMobisDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CMobisDlg::OnBnClickedButton2)
-	ON_BN_CLICKED(IDC_BUTTON3, &CMobisDlg::OnBnClickedButton3)
-	ON_BN_CLICKED(IDC_BUTTON4, &CMobisDlg::OnBnClickedButton4)
+	//ON_BN_CLICKED(IDC_BUTTON1, &CMobisDlg::OnBnClickedButton1)
+	//ON_BN_CLICKED(IDC_BUTTON2, &CMobisDlg::OnBnClickedButton2)
+	//ON_BN_CLICKED(IDC_BUTTON3, &CMobisDlg::OnBnClickedButton3)
+	//ON_BN_CLICKED(IDC_BUTTON4, &CMobisDlg::OnBnClickedButton4)
 	ON_BN_CLICKED(IDC_starttest, &CMobisDlg::OnBnClickedstarttest)
 	ON_BN_CLICKED(IDC_stoptest, &CMobisDlg::OnBnClickedstoptest)
 	ON_WM_TIMER()
@@ -166,22 +177,41 @@ BOOL CMobisDlg::OnInitDialog()
 
 
 
-	workPool_img=cv::imread("F:\\dashu\\MobisSoft-dev-单相机 - 多模板\\Mobis\\Release\\data\\2015- 5-14上部分\\13_31_29_948.jpg");
-	m_zoomPic.UpdateImage(workPool_img);   
 
-	//workPool_img2= workPool_img;
-	m_zoomPic2.UpdateImage(workPool_img2);  
+	for (int i = 0; i < m_zoomPics.size(); i++)
+	{
+		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
+		m_zoomPics[i].ID = i;
+	}
+	//int ctrNum=2;
+	//m_zoomPics.resize(ctrNum);
+	//workPool_imgs.resize(ctrNum);
 
-	m_zoomPic.ID = 0;
-	m_zoomPic2.ID = 1;
+	//vector<LeoPicture_For_Main>m_zoomPics(ctrNum);
+	//vector<Mat> workPool_imgs(ctrNum);
+
+
+	//for (int i = 0; i < m_zoomPics.size(); i++)
+	//{
+	//	m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
+	//	m_zoomPics[i].ID = i;
+	//}
+	//m_zoomPic.UpdateImage(workPool_img);   
+	//m_zoomPic2.UpdateImage(workPool_img2);  
+	//m_zoomPic.ID = 0;
+	//m_zoomPic2.ID = 1;
 
 	readFlie();
 	if(AllXingHaos.size()>0)
 	{
 		m_pos= 0;
 		CurrentXinghao = AllXingHaos[m_pos];
-		m_zoomPic.p_ModelManage = &CurrentXinghao;
-		m_zoomPic2.p_ModelManage = &CurrentXinghao;
+		for (int i = 0; i < m_zoomPics.size(); i++)
+		{
+			m_zoomPics[i].p_ModelManage = &CurrentXinghao;
+		}
+		//m_zoomPic.p_ModelManage = &CurrentXinghao;
+		//m_zoomPic2.p_ModelManage = &CurrentXinghao;
 	}
 	else 
 	{
@@ -288,15 +318,19 @@ void CMobisDlg::OnBnClickedBuildmodel()
 	{
 		selectDialog dlg;
 		dlg.xinghaos = &AllXingHaos;
-		dlg.workPool_img = workPool_img;
-		dlg.workPool_img2 = workPool_img2;
+		dlg.workPool_img = workPool_imgs[0];
+		dlg.workPool_img2 = workPool_imgs[1];
 		dlg.DoModal();
 
 
 		writeFlie();
 		CurrentXinghao = AllXingHaos[m_pos];
-		m_zoomPic.p_ModelManage = &CurrentXinghao;
-		m_zoomPic.Invalidate();
+		for (int i = 0; i < m_zoomPics.size(); i++)
+		{
+			m_zoomPics[i].p_ModelManage = &CurrentXinghao;
+		}
+		//m_zoomPic.p_ModelManage = &CurrentXinghao;
+		//m_zoomPic.Invalidate();
 		myUpdata(false);
 	}
 }
@@ -321,11 +355,15 @@ void CMobisDlg::OnSelchangeList()
 	if(m_pos>=0 &&m_pos<AllXingHaos.size())
 	{
 		CurrentXinghao = AllXingHaos[m_pos];
-		m_zoomPic.p_ModelManage = &CurrentXinghao;
+		for (int i = 0; i < m_zoomPics.size(); i++)
+		{
+			m_zoomPics[i].p_ModelManage = &CurrentXinghao;
+		}
+		/*m_zoomPic.p_ModelManage = &CurrentXinghao;
 		m_zoomPic.Invalidate();
 
 		m_zoomPic2.p_ModelManage = &CurrentXinghao;
-		m_zoomPic2.Invalidate();
+		m_zoomPic2.Invalidate();*/
 	}
 	myUpdata(false);
 }
@@ -357,8 +395,8 @@ unsigned CMobisDlg:: CheckThread(void*params)
 	{
 		if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
 		{
-			images.push_back(pCMobisDlg->workPool_img.clone());
-			images.push_back(pCMobisDlg->workPool_img2.clone());
+			images.push_back(pCMobisDlg->workPool_imgs[i].clone());
+
 		}
 	}
 
@@ -388,26 +426,33 @@ unsigned CMobisDlg:: CheckThread(void*params)
 	int modelNum = pCMobisDlg->CurrentXinghao.m_Models.size();
 	for (int i = 0; i < modelNum; i++)
 	{
+		//检测是否有图像存在////////////////////////////////
 		Model c_model =pCMobisDlg->CurrentXinghao.m_Models[i];
 		Mat image; 
-		if(c_model.m_cameraID==0)
-		{
-			if(!pCMobisDlg->workPool_img.empty())
-				image = pCMobisDlg->workPool_img;
-			else 
-				continue;
-		}
-		else if(c_model.m_cameraID==1)
-		{
-			if(!pCMobisDlg->workPool_img2.empty())
-				image = pCMobisDlg->workPool_img2;
-			else 
-				continue;
-		}
+		if(c_model.m_cameraID>pCMobisDlg->workPool_imgs.size())  //防止型号所需的CamId，在软件中不存在。防止下面数组越界
+			continue;
+		if(!pCMobisDlg->workPool_imgs[c_model.m_cameraID].empty()) //如果没有图像就不处理
+			image = pCMobisDlg->workPool_imgs[c_model.m_cameraID];
+		else 
+			continue;
+		//if(c_model.m_cameraID==0)
+		//{
+		//	if(!pCMobisDlg->workPool_img.empty())
+		//		image = pCMobisDlg->workPool_img;
+		//	else 
+		//		continue;
+		//}
+		//else if(c_model.m_cameraID==1)
+		//{
+		//	if(!pCMobisDlg->workPool_img2.empty())
+		//		image = pCMobisDlg->workPool_img2;
+		//	else 
+		//		continue;
+		//}
 
 
 
-
+		///////////////////////////////////////////////////
 
 		CDC *pdc = pCMobisDlg->m_pics[i].GetDC();
 		pdc->SetStretchBltMode(STRETCH_HALFTONE);
@@ -478,11 +523,15 @@ unsigned CMobisDlg:: CheckThread(void*params)
 		}
 
 		//更新图像主窗口		
-		pCMobisDlg->m_zoomPic.states = result;
-		pCMobisDlg->m_zoomPic.Invalidate();
-
-		pCMobisDlg->m_zoomPic2.states = result;
-		pCMobisDlg->m_zoomPic2.Invalidate();
+		for (int i = 0; i < pCMobisDlg->m_zoomPics.size(); i++)
+		{
+			pCMobisDlg->m_zoomPics[i].states = result;
+			pCMobisDlg->m_zoomPics[i].Invalidate();
+		}
+		//pCMobisDlg->m_zoomPic.states = result;
+		//pCMobisDlg->m_zoomPic.Invalidate();
+		//pCMobisDlg->m_zoomPic2.states = result;
+		//pCMobisDlg->m_zoomPic2.Invalidate();
 	}
 
 	//保存图像数据
@@ -560,17 +609,17 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 			if(pCMobisDlg->m_cameraManage.m_cameraList.size()>=1)
 			{
 				EnterCriticalSection(&g_CamBufs[camID]); 
-				pCMobisDlg->workPool_img = pCMobisDlg->m_cameraManage.m_cameraList[camID].img;
-				Mat rgb_img=pCMobisDlg->workPool_img.clone();//将相机图像数据拷贝出来 用于显示
+				pCMobisDlg->workPool_imgs[camID] = pCMobisDlg->m_cameraManage.m_cameraList[camID].img;
+				Mat rgb_img=pCMobisDlg->workPool_imgs[camID].clone();//将相机图像数据拷贝出来 用于显示
 				LeaveCriticalSection(&g_CamBufs[camID]); 
 				SetEvent(g_ReadyChecks[camID]);			//通知检测函数，图像已经准备好
 
 
 				if(rgb_img.channels()==1)
 					cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-				if(::IsWindowEnabled( pCMobisDlg->GetSafeHwnd()))
+				if(::IsWindowEnabled( pCMobisDlg->m_zoomPics[camID].GetSafeHwnd()))
 				{
-					pCMobisDlg->m_zoomPic.UpdateImage(rgb_img);
+					pCMobisDlg->m_zoomPics[camID].UpdateImage(rgb_img);
 				}
 
 			}
@@ -838,130 +887,134 @@ void CMobisDlg::OnTimer(UINT_PTR nIDEvent)
 
 
 
-void CMobisDlg::OnBnClickedButton1()
-{
-	// 设置过滤器   
-	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
-	// 构造打开文件对话框   
-	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
-	CString strFilePath;   
-
-	// 显示打开文件对话框   
-	if (IDOK == fileDlg.DoModal())   
-	{   
-		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
-		strFilePath = fileDlg.GetPathName(); 
-		workPool_img = imread(strFilePath.GetBuffer(0));
-
-		Mat rgb_img = workPool_img;
-		if(rgb_img.channels()==1)
-			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-		m_zoomPic.UpdateImage(rgb_img);
-
-	}
-}   
-
-void CMobisDlg::OnBnClickedButton2()
-{
-	// 设置过滤器   
-	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
-	// 构造打开文件对话框   
-	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
-	CString strFilePath;   
-
-	// 显示打开文件对话框   
-	if (IDOK == fileDlg.DoModal())   
-	{   
-		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
-		strFilePath = fileDlg.GetPathName(); 
-		workPool_img2 = imread(strFilePath.GetBuffer(0));
-
-		Mat rgb_img = workPool_img2;
-		if(rgb_img.channels()==1)
-			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-		m_zoomPic2.UpdateImage(rgb_img);
-
-
-	}   
-}
-
-void CMobisDlg::OnBnClickedButton3()
-{
-	// 设置过滤器   
-	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
-	// 构造打开文件对话框   
-	CFileDialog fileDlg(false, NULL, NULL, 0, szFilter, this);   
-	CString strFilePath;   
-
-	// 显示打开文件对话框   
-	if (IDOK == fileDlg.DoModal())   
-	{   
-		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
-		strFilePath = fileDlg.GetPathName(); 
-
-		string src  = strFilePath.GetBuffer(0);
-
-		for (int i = 0; i < CurrentXinghao.m_Models.size(); i++)
-		{
-			Mat pmodel = CurrentXinghao.m_Models[i].m_pModels[0];
-			Mat nmodel = CurrentXinghao.m_Models[i].m_nModels[0];
-			Mat testimage(workPool_img,CurrentXinghao.m_Models[i].Search_rect);
-
-			CString pstr;
-			pstr.Format(strFilePath+"_PModel_"+"%d"+".bmp",i);
-			imwrite(pstr.GetBuffer(),pmodel);
-
-			CString nstr;
-			nstr.Format(strFilePath+"_NModel_"+"%d"+".bmp",i);
-			imwrite(nstr.GetBuffer(),nmodel);
-
-			CString reginstr;
-			reginstr.Format(strFilePath+"_region_"+"%d"+".bmp",i);
-			imwrite(reginstr.GetBuffer(),testimage);
-
-
-		}
-		/*workPool_img2 = imread(strFilePath.GetBuffer(0));
-
-		Mat rgb_img = workPool_img2;
-		if(rgb_img.channels()==1)
-		cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-		m_zoomPic2.UpdateImage(rgb_img);*/
-
-
-	}   
-}
-
-void CMobisDlg::OnBnClickedButton4()
-{
-	vector<double> values;
-	int num = CurrentXinghao.m_Models.size();
-	for (int i = 0; i <num; i++)
-	{
-
-		Mat pmodel = CurrentXinghao.m_Models[i].m_pModels[0];
-		Mat nmodel = CurrentXinghao.m_Models[i].m_nModels[0];
-		Mat result;
-		matchTemplate(pmodel,nmodel,result,CV_TM_CCOEFF_NORMED);
-		double maxValue;
-		minMaxLoc(result,0,&maxValue,0,0);
-		values.push_back(maxValue);
-	}
-	CString messages;
-	for (int i = 0; i < values.size(); i++)
-	{
-		CString m;
-		m.Format("位置%d  :正负模板相似度=%.3f   \n",i+1,values[i]);
-		messages+=m;
-	}
-	MessageBoxA(messages,"详细结果",0);
-
-
-
-	ofstream fout;
-	fout.open("output.txt");
-	fout << messages << "\n";
-
-
-
-}
+//void CMobisDlg::OnBnClickedButton1()
+//{
+//	// 设置过滤器   
+//	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
+//	// 构造打开文件对话框   
+//	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
+//	CString strFilePath;   
+//
+//	// 显示打开文件对话框   
+//	if (IDOK == fileDlg.DoModal())   
+//	{   
+//		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
+//		strFilePath = fileDlg.GetPathName(); 
+//		if (workPool_imgs.size()<1)
+//			return ;
+//		workPool_imgs[0] = imread(strFilePath.GetBuffer(0));
+//
+//		Mat rgb_img = workPool_imgs[0];
+//		if(rgb_img.channels()==1)
+//			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+//		m_zoomPics[0].UpdateImage(rgb_img);
+//
+//	}
+//}   
+//
+//void CMobisDlg::OnBnClickedButton2()
+//{
+//	// 设置过滤器   
+//	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
+//	// 构造打开文件对话框   
+//	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
+//	CString strFilePath;   
+//
+//	// 显示打开文件对话框   
+//	if (IDOK == fileDlg.DoModal())   
+//	{   
+//		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
+//		strFilePath = fileDlg.GetPathName(); 
+//		if (workPool_imgs.size()<2)
+//			return ;
+//		workPool_imgs[1]= imread(strFilePath.GetBuffer(0));
+//
+//		Mat rgb_img = workPool_imgs[1];
+//		if(rgb_img.channels()==1)
+//			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+//		m_zoomPics[1].UpdateImage(rgb_img);
+//
+//
+//	}   
+//}
+//
+//void CMobisDlg::OnBnClickedButton3()
+//{
+//	// 设置过滤器   
+//	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
+//	// 构造打开文件对话框   
+//	CFileDialog fileDlg(false, NULL, NULL, 0, szFilter, this);   
+//	CString strFilePath;   
+//
+//	// 显示打开文件对话框   
+//	if (IDOK == fileDlg.DoModal())   
+//	{   
+//		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
+//		strFilePath = fileDlg.GetPathName(); 
+//
+//		string src  = strFilePath.GetBuffer(0);
+//
+//		for (int i = 0; i < CurrentXinghao.m_Models.size(); i++)
+//		{
+//			Mat pmodel = CurrentXinghao.m_Models[i].m_pModels[0];
+//			Mat nmodel = CurrentXinghao.m_Models[i].m_nModels[0];
+//			Mat testimage(workPool_imgs[0],CurrentXinghao.m_Models[i].Search_rect);
+//
+//			CString pstr;
+//			pstr.Format(strFilePath+"_PModel_"+"%d"+".bmp",i);
+//			imwrite(pstr.GetBuffer(),pmodel);
+//
+//			CString nstr;
+//			nstr.Format(strFilePath+"_NModel_"+"%d"+".bmp",i);
+//			imwrite(nstr.GetBuffer(),nmodel);
+//
+//			CString reginstr;
+//			reginstr.Format(strFilePath+"_region_"+"%d"+".bmp",i);
+//			imwrite(reginstr.GetBuffer(),testimage);
+//
+//
+//		}
+//		/*workPool_img2 = imread(strFilePath.GetBuffer(0));
+//
+//		Mat rgb_img = workPool_img2;
+//		if(rgb_img.channels()==1)
+//		cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+//		m_zoomPic2.UpdateImage(rgb_img);*/
+//
+//
+//	}   
+//}
+//
+//void CMobisDlg::OnBnClickedButton4()
+//{
+//	vector<double> values;
+//	int num = CurrentXinghao.m_Models.size();
+//	for (int i = 0; i <num; i++)
+//	{
+//
+//		Mat pmodel = CurrentXinghao.m_Models[i].m_pModels[0];
+//		Mat nmodel = CurrentXinghao.m_Models[i].m_nModels[0];
+//		Mat result;
+//		matchTemplate(pmodel,nmodel,result,CV_TM_CCOEFF_NORMED);
+//		double maxValue;
+//		minMaxLoc(result,0,&maxValue,0,0);
+//		values.push_back(maxValue);
+//	}
+//	CString messages;
+//	for (int i = 0; i < values.size(); i++)
+//	{
+//		CString m;
+//		m.Format("位置%d  :正负模板相似度=%.3f   \n",i+1,values[i]);
+//		messages+=m;
+//	}
+//	MessageBoxA(messages,"详细结果",0);
+//
+//
+//
+//	ofstream fout;
+//	fout.open("output.txt");
+//	fout << messages << "\n";
+//
+//
+//
+//}
