@@ -61,3 +61,4 @@
 extern int g_CamNum;
 extern std::vector<CRITICAL_SECTION>  g_CamBufs;
 extern std::vector<HANDLE> g_CamAcqs;
+extern std::vector<HANDLE> g_ReadyChecks;

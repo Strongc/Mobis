@@ -212,7 +212,11 @@ BOOL CMobisDlg::OnInitDialog()
 		InitializeCriticalSection(&g_CamBufs[i]); 
 		g_CamAcqs[i] = CreateEvent( NULL, FALSE, FALSE, NULL );
 	}
-
+	//初始化全局变量 ---按下check按钮，得到最新图像所需同步的变量///////////////////////////////////////
+	for (int i = 0; i < g_CamNum; i++)
+	{
+		g_ReadyChecks[i] = CreateEventA( NULL, TRUE, FALSE, NULL );
+	}
 
 	//初始化采集线程////////////////////////////////////////////////////////////////////////////////////
 	point_and_camIDs.resize(g_CamNum);
@@ -337,19 +341,30 @@ unsigned CMobisDlg:: CheckThread(void*params)
 {
 	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
 	//获取图像///////////////////////////////////////////////////////////////////////////////
+	vector<Mat>images; 
+
 	int num = pCMobisDlg->m_cameraManage.m_cameraList.size();
 	if (num>0 && pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
 	{
 		for (int i = 0; i < num; i++)
 		{
 			pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
+			ResetEvent(g_ReadyChecks[i]);     //同步
 		}
 	}
 
-	
-	vector<Mat>images; 
-	images.push_back(pCMobisDlg->workPool_img.clone());
-	images.push_back(pCMobisDlg->workPool_img2.clone());
+	for (int i = 0; i < num; i++)
+	{
+		if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
+		{
+			images.push_back(pCMobisDlg->workPool_img.clone());
+			images.push_back(pCMobisDlg->workPool_img2.clone());
+		}
+	}
+
+
+
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//擦除检测区域图像
 	for (int i = 0; i < 20; i++)
@@ -548,6 +563,8 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 				pCMobisDlg->workPool_img = pCMobisDlg->m_cameraManage.m_cameraList[camID].img;
 				Mat rgb_img=pCMobisDlg->workPool_img.clone();//将相机图像数据拷贝出来 用于显示
 				LeaveCriticalSection(&g_CamBufs[camID]); 
+				SetEvent(g_ReadyChecks[camID]);			//通知检测函数，图像已经准备好
+
 
 				if(rgb_img.channels()==1)
 					cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
