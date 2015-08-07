@@ -80,6 +80,45 @@ bool camera_jai::openCamera()
 
 bool camera_jai::startCapture()
 {
+	uint32_t        nNodes;
+	J_STATUS_TYPE   retval;
+	NODE_HANDLE     hNode;
+	int8_t          sNodeName[256];
+	uint32_t        size;// Get the number of nodes
+	vector<CString> s;
+
+	retval = J_Camera_GetNumOfNodes(m_hCam, &nNodes);
+	if (retval == J_ST_SUCCESS)
+	{  
+		CString t1;
+		t1.Format("%u nodes were found\n", nNodes);
+		s.push_back(t1);
+		for (uint32_t index = 0; index < nNodes; ++index)  
+		{    // Get node handle    
+			retval = J_Camera_GetNodeByIndex(m_hCam, index, &hNode);    
+			if (retval == J_ST_SUCCESS)    
+			{      // Get node name      
+				size = sizeof(sNodeName);      
+				retval = J_Node_GetName(hNode, sNodeName, &size, 0);      
+				if (retval == J_ST_SUCCESS)      
+				{        // Print out the name        
+					//printf("%u NodeName = %s\n", index, sNodeName); 
+					CString t2;
+					t2.Format("%u NodeName = %s\n", index, sNodeName);
+					s.push_back(t2);
+
+				}    
+			}  
+		}
+	}
+
+	//int64_t int64Valt=10;
+	//J_Camera_SetValueInt64(m_hCam, (int8_t*)"AcquisitionFrameRateAbs",int64Valt);
+	//
+	//int64_t int64Valout;
+	//J_Camera_GetValueInt64(m_hCam, (int8_t*)"AcquisitionFrameRateAbs",&int64Valout);
+
+
 	J_STATUS_TYPE	status = J_ST_SUCCESS;
 
 	int64_t int64Val;
@@ -351,16 +390,17 @@ void camera_jai::PrepareSwTrigSetting()
 
 void camera_jai::StreamCBFunc(J_tIMAGE_INFO * pAqImageInfo)
 {
-	
 
+	
 	img.create(cvSize(pAqImageInfo->iSizeX,pAqImageInfo->iSizeY), CV_8UC1);
 	if(m_camIndex>=g_CamNum)  //保证g_CamBufs[m_camIndex]，g_CamAcqs[m_camIndex] 不越界
 		return ;
 	EnterCriticalSection(&g_CamBufs[m_camIndex]); 
 	memcpy(img.data,pAqImageInfo->pImageBuffer,img.total());
+	cv::Mat test =img;
 	LeaveCriticalSection(&g_CamBufs[m_camIndex]); 
 	SetEvent(g_CamAcqs[m_camIndex]);
-	
+
 
 	CWnd *pWnd1=CWnd::FindWindow(NULL,_T(" 螺丝检测"));//获取目标窗口
 	if(::IsWindowEnabled( pWnd1->GetSafeHwnd()))

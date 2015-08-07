@@ -47,6 +47,7 @@ public:
       int from_x = 0, int from_y = 0 );
    /* draw the current image ROI to the specified rectangle of the destination DC */
    virtual void  DrawToHDC( HDC hDCDst, RECT* pDstRect );
+  // void  DrawToHDC_L( HDC hDCDst, RECT* pDstRect );
 #endif
 protected:
    IplImage*  m_img;

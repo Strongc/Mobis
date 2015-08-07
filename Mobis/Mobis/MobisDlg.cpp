@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <vld.h>
 #include "Mobis.h"
 #include "MobisDlg.h"
 #include "types.h"
@@ -6,6 +7,7 @@
 #include"sheet_Seting.h"
 #include<fstream> 
 #include "afxdialogex.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -183,23 +185,7 @@ BOOL CMobisDlg::OnInitDialog()
 		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
 		m_zoomPics[i].ID = i;
 	}
-	//int ctrNum=2;
-	//m_zoomPics.resize(ctrNum);
-	//workPool_imgs.resize(ctrNum);
-
-	//vector<LeoPicture_For_Main>m_zoomPics(ctrNum);
-	//vector<Mat> workPool_imgs(ctrNum);
-
-
-	//for (int i = 0; i < m_zoomPics.size(); i++)
-	//{
-	//	m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
-	//	m_zoomPics[i].ID = i;
-	//}
-	//m_zoomPic.UpdateImage(workPool_img);   
-	//m_zoomPic2.UpdateImage(workPool_img2);  
-	//m_zoomPic.ID = 0;
-	//m_zoomPic2.ID = 1;
+	
 
 	readFlie();
 	if(AllXingHaos.size()>0)
@@ -372,11 +358,12 @@ void CMobisDlg::OnBnClickedBegincheck()
 {
 
 	m_hCheckThread = (HANDLE)_beginthreadex(NULL,0,CheckThread,this,0,NULL);
-
+	return ;
 }
 
 unsigned CMobisDlg:: CheckThread(void*params)
 {
+
 	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
 	//获取图像///////////////////////////////////////////////////////////////////////////////
 	vector<Mat>images; 
@@ -621,7 +608,7 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 				{
 					pCMobisDlg->m_zoomPics[camID].UpdateImage(rgb_img);
 				}
-
+				Sleep(100);  //控制显示速度，太快UI线程会卡
 			}
 		}
 	}

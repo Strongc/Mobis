@@ -30,6 +30,7 @@ public:
 	cv::Point			ClientToImage(CPoint &pt);
 	cv::Point			ImageToClient(cv::Point &pt);
 
+	CRITICAL_SECTION  m_protect4m_img;
 	cv::Mat  m_img;
 	cv::Rect RectRoi;
 	LeoRectTracker		*m_RectTracker;

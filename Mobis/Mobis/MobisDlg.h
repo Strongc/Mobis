@@ -36,9 +36,9 @@ protected:
 public:
 
 	//整体大图控件及变量
+
 	//LeoPicture_For_Main m_zoomPic;
 	//Mat workPool_img;
-
 	//LeoPicture_For_Main m_zoomPic2;
 	//Mat workPool_img2;
 

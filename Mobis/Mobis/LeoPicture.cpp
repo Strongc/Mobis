@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "LeoPicture.h"
 #include "CvvImage.h"
+#include"resource.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -10,6 +11,7 @@ static char THIS_FILE[] = __FILE__;
 LeoPicture::LeoPicture(void)
 {
 	m_RectTracker=NULL;
+	InitializeCriticalSection(&m_protect4m_img); 
 }
 
 
@@ -38,10 +40,11 @@ END_MESSAGE_MAP()
 
 void LeoPicture::OnPaint()
 {
-	//EnterCriticalSection(&g_CamBufs[0]); 
+	
 	CPaintDC dc(this);
+	EnterCriticalSection(&m_protect4m_img); 
 	Draw(&dc);
-	//LeaveCriticalSection(&g_CamBufs[0]); 
+	LeaveCriticalSection(&m_protect4m_img); 
 }
 
 //---------------------------------------------------------------------
@@ -256,6 +259,7 @@ cv::Point LeoPicture::ImageToClient(cv::Point &pt)
 
 void LeoPicture::UpdateImage(cv::Mat image)
 {
+	EnterCriticalSection(&m_protect4m_img); 
 	if(image.rows==m_img.rows&&image.cols==m_img.cols)
 	{
 		m_img=image;
@@ -265,7 +269,17 @@ void LeoPicture::UpdateImage(cv::Mat image)
 		m_img=image;
 		RectRoi = Rect(0,0,m_img.cols,m_img.rows);
 	}
-	Invalidate();
+	LeaveCriticalSection(&m_protect4m_img); 
+
+
+	CRect rect;
+	GetClientRect(rect);  
+	InvalidateRect(rect);
+	//Invalidate();
+	/*CClientDC dc(this);
+	EnterCriticalSection(&m_protect4m_img); 
+	Draw(&dc);
+	LeaveCriticalSection(&m_protect4m_img); */
 }
 
 
