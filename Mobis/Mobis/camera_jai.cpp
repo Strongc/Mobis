@@ -391,7 +391,7 @@ void camera_jai::PrepareSwTrigSetting()
 void camera_jai::StreamCBFunc(J_tIMAGE_INFO * pAqImageInfo)
 {
 
-	
+
 	img.create(cvSize(pAqImageInfo->iSizeX,pAqImageInfo->iSizeY), CV_8UC1);
 	if(m_camIndex>=g_CamNum)  //保证g_CamBufs[m_camIndex]，g_CamAcqs[m_camIndex] 不越界
 		return ;
@@ -402,26 +402,26 @@ void camera_jai::StreamCBFunc(J_tIMAGE_INFO * pAqImageInfo)
 	SetEvent(g_CamAcqs[m_camIndex]);
 
 
-	CWnd *pWnd1=CWnd::FindWindow(NULL,_T(" 螺丝检测"));//获取目标窗口
-	if(::IsWindowEnabled( pWnd1->GetSafeHwnd()))
-	{
-		if(pWnd1!=NULL) 
-			pWnd1->PostMessageA(WM_DATA_READY,m_camIndex,0);
-	}
+	//CWnd *pWnd1=CWnd::FindWindow(NULL,_T(" 螺丝检测"));//获取目标窗口
+	//if(::IsWindowEnabled( pWnd1->GetSafeHwnd()))
+	//{
+	//	if(pWnd1!=NULL) 
+	//		pWnd1->PostMessageA(WM_DATA_READY,m_camIndex,0);
+	//}
 
-	CWnd *pWnd2=CWnd::FindWindow(NULL,_T("灯型编辑"));//获取目标窗口
-	if(::IsWindowEnabled( pWnd2->GetSafeHwnd()))
-	{
-		if(pWnd2!=NULL)
-			pWnd2->PostMessageA(WM_DATA_READY,m_camIndex,0);
-	}
+	//CWnd *pWnd2=CWnd::FindWindow(NULL,_T("灯型编辑"));//获取目标窗口
+	//if(::IsWindowEnabled( pWnd2->GetSafeHwnd()))
+	//{
+	//	if(pWnd2!=NULL)
+	//		pWnd2->PostMessageA(WM_DATA_READY,m_camIndex,0);
+	//}
 
-	CWnd *pWnd3=CWnd::FindWindow(NULL,_T("模板编辑"));//获取目标窗口
-	if(::IsWindowEnabled( pWnd3->GetSafeHwnd()))
-	{
-		if(pWnd3!=NULL)
-			pWnd3->PostMessageA(WM_DATA_READY,m_camIndex,0);
-	}
+	//CWnd *pWnd3=CWnd::FindWindow(NULL,_T("模板编辑"));//获取目标窗口
+	//if(::IsWindowEnabled( pWnd3->GetSafeHwnd()))
+	//{
+	//	if(pWnd3!=NULL)
+	//		pWnd3->PostMessageA(WM_DATA_READY,m_camIndex,0);
+	//}
 
 
 }

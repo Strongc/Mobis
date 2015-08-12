@@ -6,7 +6,7 @@
 #include "AddModelDlg.h"
 IMPLEMENT_DYNAMIC(selectDialog, CDialogEx)
 
-selectDialog::selectDialog(CWnd* pParent /*=NULL*/)
+	selectDialog::selectDialog(CWnd* pParent /*=NULL*/)
 	: CDialogEx(selectDialog::IDD, pParent)
 {
 
@@ -34,24 +34,25 @@ BOOL selectDialog::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 
-	m_zoomCtrl.ID = 0;
-	m_zoomCtrl2.ID = 1;
+
 
 	m_curren_name=_T("");
 	m_current_num=0;
 	m_pos=-1;
 
-	//初始化图像控件
+	//初始化PictureControl控件///////////////////////
+	m_zoomCtrl.ID = 0;
+	m_zoomCtrl2.ID = 1;
 	if(!workPool_img.empty())
 		m_zoomCtrl.UpdateImage(workPool_img);
 	if(!workPool_img2.empty())
 		m_zoomCtrl2.UpdateImage(workPool_img2);
-	//更新型号列表框
-	for (int i = 0; i < xinghaos->size(); i++)
-	{
-		LPCTSTR str = (*xinghaos)[i].m_Describe.c_str(); 
-		m_list_xinghao.AddString(str);
-	}
+	////更新型号列表框
+	//for (int i = 0; i < xinghaos->size(); i++)
+	//{
+	//	LPCTSTR str = (*xinghaos)[i].m_Describe.c_str(); 
+	//	m_list_xinghao.AddString(str);
+	//}
 
 	//初始化工作区ModelManage变量
 	if(xinghaos->size()>0)
@@ -166,9 +167,22 @@ void selectDialog::OnPaint()
 
 void selectDialog::OnBnClickedOk()
 {
+	int return_value_ID  = MessageBoxA("是否保存数据","保存对话框",MB_YESNOCANCEL);
+	if(return_value_ID == IDYES)
+	{
+		OnBnClickedSave();
+		CDialogEx::OnOK();
+	}
+	else if (return_value_ID == IDNO)
+	{
+		CDialogEx::OnOK();
+	}
+	else if (return_value_ID == IDCANCEL)
+	{
+		;
+	}
 
 
-	CDialogEx::OnOK();
 }
 
 

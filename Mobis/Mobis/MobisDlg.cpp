@@ -66,7 +66,7 @@ void CMobisDlg::DoDataExchange(CDataExchange* pDX)
 	//}
 	DDX_Control(pDX, IDC_IMG,m_zoomPics[0]);
 	DDX_Control(pDX, IDC_IMG2,m_zoomPics[1]);
-	//DDX_Control(pDX, IDC_IMG2, m_zoomPic2);
+
 
 	DDX_Control(pDX, IDC_PIC1, m_pics[0]);
 	DDX_Control(pDX, IDC_PIC2, m_pics[1]);
@@ -179,14 +179,15 @@ BOOL CMobisDlg::OnInitDialog()
 
 
 
-
+	//初始化PictureControl控件///////////////////////
 	for (int i = 0; i < m_zoomPics.size(); i++)
 	{
 		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
 		m_zoomPics[i].ID = i;
 	}
-	
 
+
+	//从文件读型号信息，并赋予PictureControl控件///////////
 	readFlie();
 	if(AllXingHaos.size()>0)
 	{
@@ -196,21 +197,20 @@ BOOL CMobisDlg::OnInitDialog()
 		{
 			m_zoomPics[i].p_ModelManage = &CurrentXinghao;
 		}
-		//m_zoomPic.p_ModelManage = &CurrentXinghao;
-		//m_zoomPic2.p_ModelManage = &CurrentXinghao;
 	}
 	else 
 	{
 		m_pos= -1;
 	}
-
-	myUpdata(false);
-
+	//初始化所需图片////////////////////////////////
 	m_pass = imread("pass.bmp");
 	m_ng = imread("ng.bmp");
 	m_no = imread("no.bmp");
 
+	//初始化型号列表控件////////////////////////////
+	myUpdata(false);
 
+	//初始化相机///////////////////////////////////
 	//m_cameraManage.findCamera();
 	if(m_cameraManage.m_cameraIDList.size()<1)
 	{
@@ -231,7 +231,7 @@ BOOL CMobisDlg::OnInitDialog()
 	//初始化全局变量 ---按下check按钮，得到最新图像所需同步的变量///////////////////////////////////////
 	for (int i = 0; i < g_CamNum; i++)
 	{
-		g_ReadyChecks[i] = CreateEventA( NULL, TRUE, FALSE, NULL );
+		g_ReadyChecks[i] = CreateEvent( NULL, TRUE, FALSE, NULL );
 	}
 
 	//初始化采集线程////////////////////////////////////////////////////////////////////////////////////
@@ -315,8 +315,6 @@ void CMobisDlg::OnBnClickedBuildmodel()
 		{
 			m_zoomPics[i].p_ModelManage = &CurrentXinghao;
 		}
-		//m_zoomPic.p_ModelManage = &CurrentXinghao;
-		//m_zoomPic.Invalidate();
 		myUpdata(false);
 	}
 }
@@ -593,7 +591,7 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 	{
 		if(WaitForSingleObject(g_CamAcqs[camID],INFINITE)==WAIT_OBJECT_0)
 		{
-			if(pCMobisDlg->m_cameraManage.m_cameraList.size()>=1)
+			if(!pCMobisDlg->m_cameraManage.m_cameraList.empty())
 			{
 				EnterCriticalSection(&g_CamBufs[camID]); 
 				pCMobisDlg->workPool_imgs[camID] = pCMobisDlg->m_cameraManage.m_cameraList[camID].img;
@@ -753,24 +751,34 @@ void CMobisDlg::savePic(vector<cv::Mat> imgs)
 
 LRESULT CMobisDlg::camera_buf_ready(WPARAM wParam, LPARAM lParam)
 {
-	//if(wParam==0&&m_cameraManage.m_cameraList.size()>=1)
-	//{
-	//	workPool_img = m_cameraManage.m_cameraList[0].img;
-	//	Mat rgb_img=workPool_img;
+	if(wParam==0&&m_cameraManage.m_cameraList.size()>=1)
+	{
+		EnterCriticalSection(&g_CamBufs[0]); 
+		workPool_imgs[0] = m_cameraManage.m_cameraList[0].img;
+		Mat rgb_img=workPool_imgs[0];
+		LeaveCriticalSection(&g_CamBufs[0]); 
 
-	//	if(rgb_img.channels()==1)
-	//		cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-	//	m_zoomPic.UpdateImage(rgb_img);
-	//}
-	//else if(wParam==1&&m_cameraManage.m_cameraList.size()>=2)
-	//{
-	//	workPool_img2 = m_cameraManage.m_cameraList[1].img;
-	//	Mat rgb_img2 = workPool_img2;
+		if(rgb_img.channels()==1)
+			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+		if(::IsWindowEnabled( m_zoomPics[0].GetSafeHwnd()))
+		{
+			m_zoomPics[0].UpdateImage(rgb_img);
+		}
+	}
+	else if(wParam==1&&m_cameraManage.m_cameraList.size()>=2)
+	{
+		EnterCriticalSection(&g_CamBufs[1]); 
+		workPool_imgs[1] = m_cameraManage.m_cameraList[1].img;
+		Mat rgb_img2 = workPool_imgs[1];
+		LeaveCriticalSection(&g_CamBufs[1]); 
+		if(rgb_img2.channels()==1)
+			cvtColor(rgb_img2,rgb_img2,CV_GRAY2RGB);
 
-	//	if(rgb_img2.channels()==1)
-	//		cvtColor(rgb_img2,rgb_img2,CV_GRAY2RGB);
-	//	m_zoomPic2.UpdateImage(rgb_img2);
-	//}
+		if(::IsWindowEnabled( m_zoomPics[1].GetSafeHwnd()))
+		{
+			m_zoomPics[1].UpdateImage(rgb_img2);
+		}
+	}
 
 	//SetEvent(m_hAcqEvent);
 	return true;

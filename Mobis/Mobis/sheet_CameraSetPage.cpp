@@ -13,7 +13,6 @@ IMPLEMENT_DYNAMIC(sheet_CameraSetPage, CPropertyPage)
 
 	sheet_CameraSetPage::sheet_CameraSetPage()
 	: CPropertyPage(sheet_CameraSetPage::IDD)
-	, m_trigerType(0)
 {
 
 }
@@ -35,6 +34,13 @@ BEGIN_MESSAGE_MAP(sheet_CameraSetPage, CPropertyPage)
 END_MESSAGE_MAP()
 
 
+BOOL sheet_CameraSetPage::OnInitDialog()
+{
+	if(!m_pMaindata->m_cameraManage.m_cameraList.empty())
+		m_trigerType = m_pMaindata->m_cameraManage.m_cameraList[0].m_TrigSetting;
+	UpdateData(FALSE);
+	return true;
+}
 
 int sheet_CameraSetPage::getData(CMobisDlg*pMaindata)
 {
@@ -65,7 +71,7 @@ void sheet_CameraSetPage::OnBnClickedConnectCam()
 
 
 	m_cameraManage.findCamera();
-	if(m_cameraManage.m_cameraIDList.size()>=1)
+	if(!m_cameraManage.m_cameraIDList.empty())
 	{
 		//Sleep(10000);
 		m_cameraManage.allocationCameraConnect();
