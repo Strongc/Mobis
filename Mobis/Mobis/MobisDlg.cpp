@@ -124,8 +124,8 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_list, &CMobisDlg::OnSelchangeList)
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
 	ON_WM_SIZE()
-	//ON_BN_CLICKED(IDC_BUTTON1, &CMobisDlg::OnBnClickedButton1)
-	//ON_BN_CLICKED(IDC_BUTTON2, &CMobisDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON1, &CMobisDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CMobisDlg::OnBnClickedButton2)
 	//ON_BN_CLICKED(IDC_BUTTON3, &CMobisDlg::OnBnClickedButton3)
 	//ON_BN_CLICKED(IDC_BUTTON4, &CMobisDlg::OnBnClickedButton4)
 	ON_BN_CLICKED(IDC_starttest, &CMobisDlg::OnBnClickedstarttest)
@@ -367,23 +367,45 @@ unsigned CMobisDlg:: CheckThread(void*params)
 	vector<Mat>images; 
 
 	int num = pCMobisDlg->m_cameraManage.m_cameraList.size();
-	if (num>0 && pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
+	if (num>0 )  //有相机
 	{
+		if(pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
+		{
+			for (int i = 0; i < num; i++)
+			{
+				pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
+				ResetEvent(g_ReadyChecks[i]);     //同步
+			}
+		}
+		else
+		{
+			for (int i = 0; i < num; i++)
+			{
+				ResetEvent(g_ReadyChecks[i]);     //同步
+			}
+
+		}
+
+
 		for (int i = 0; i < num; i++)
 		{
-			pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
-			ResetEvent(g_ReadyChecks[i]);     //同步
+			if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
+			{
+				images.push_back(pCMobisDlg->workPool_imgs[i].clone());
+
+			}
 		}
 	}
-
-	for (int i = 0; i < num; i++)
+	else if(num==0)//无相机，检测指定图片
 	{
-		if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
+		for (int i = 0; i <pCMobisDlg->workPool_imgs.size(); i++)
 		{
 			images.push_back(pCMobisDlg->workPool_imgs[i].clone());
-
 		}
 	}
+
+
+
 
 
 
@@ -882,56 +904,56 @@ void CMobisDlg::OnTimer(UINT_PTR nIDEvent)
 
 
 
-//void CMobisDlg::OnBnClickedButton1()
-//{
-//	// 设置过滤器   
-//	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
-//	// 构造打开文件对话框   
-//	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
-//	CString strFilePath;   
-//
-//	// 显示打开文件对话框   
-//	if (IDOK == fileDlg.DoModal())   
-//	{   
-//		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
-//		strFilePath = fileDlg.GetPathName(); 
-//		if (workPool_imgs.size()<1)
-//			return ;
-//		workPool_imgs[0] = imread(strFilePath.GetBuffer(0));
-//
-//		Mat rgb_img = workPool_imgs[0];
-//		if(rgb_img.channels()==1)
-//			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-//		m_zoomPics[0].UpdateImage(rgb_img);
-//
-//	}
-//}   
-//
-//void CMobisDlg::OnBnClickedButton2()
-//{
-//	// 设置过滤器   
-//	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
-//	// 构造打开文件对话框   
-//	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
-//	CString strFilePath;   
-//
-//	// 显示打开文件对话框   
-//	if (IDOK == fileDlg.DoModal())   
-//	{   
-//		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
-//		strFilePath = fileDlg.GetPathName(); 
-//		if (workPool_imgs.size()<2)
-//			return ;
-//		workPool_imgs[1]= imread(strFilePath.GetBuffer(0));
-//
-//		Mat rgb_img = workPool_imgs[1];
-//		if(rgb_img.channels()==1)
-//			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-//		m_zoomPics[1].UpdateImage(rgb_img);
-//
-//
-//	}   
-//}
+void CMobisDlg::OnBnClickedButton1()
+{
+	// 设置过滤器   
+	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
+	// 构造打开文件对话框   
+	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
+	CString strFilePath;   
+
+	// 显示打开文件对话框   
+	if (IDOK == fileDlg.DoModal())   
+	{   
+		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
+		strFilePath = fileDlg.GetPathName(); 
+		if (workPool_imgs.size()<1)
+			return ;
+		workPool_imgs[0] = imread(strFilePath.GetBuffer(0));
+
+		Mat rgb_img = workPool_imgs[0];
+		if(rgb_img.channels()==1)
+			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+		m_zoomPics[0].UpdateImage(rgb_img);
+
+	}
+}   
+
+void CMobisDlg::OnBnClickedButton2()
+{
+	// 设置过滤器   
+	TCHAR szFilter[] = _T("所有文件(*.*)|*.*||");   
+	// 构造打开文件对话框   
+	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
+	CString strFilePath;   
+
+	// 显示打开文件对话框   
+	if (IDOK == fileDlg.DoModal())   
+	{   
+		// 如果点击了文件对话框上的“打开”按钮，则将新图像显示出来
+		strFilePath = fileDlg.GetPathName(); 
+		if (workPool_imgs.size()<2)
+			return ;
+		workPool_imgs[1]= imread(strFilePath.GetBuffer(0));
+
+		Mat rgb_img = workPool_imgs[1];
+		if(rgb_img.channels()==1)
+			cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
+		m_zoomPics[1].UpdateImage(rgb_img);
+
+
+	}   
+}
 //
 //void CMobisDlg::OnBnClickedButton3()
 //{

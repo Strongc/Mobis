@@ -29,4 +29,6 @@ public:
 	int m_PicType;
 	int m_SaveDays;
 	CMobisDlg* m_pMaindata;
+	CString m_dataPath;
+	afx_msg void OnBnClickedChosepath();
 };

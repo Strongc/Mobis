@@ -59,6 +59,8 @@ private:
 	ModelManage  *m_ModelManage;
 	int m_PicType;
 	int m_dateNum;
+public:
+	CString m_dataPath;
 	int warmspace ;  //磁盘空间小于200M 将警告
 	int errospace ;	//磁盘空间小于50M 将出错
 };

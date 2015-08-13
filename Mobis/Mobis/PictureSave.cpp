@@ -8,8 +8,10 @@ PictureSave::PictureSave(void)
 	int warmspace =200;    //磁盘空间小于200M 将警告
 	int errospace = 50;	   //磁盘空间小于50M 将出错
 	m_ModelManage=NULL;
-	m_PicType=::GetPrivateProfileInt("数据保存设置","图像格式",0,".//setting.ini");
-	m_dateNum=::GetPrivateProfileInt("数据保存设置","保存天数",100,".//setting.ini");
+	UpdateParm();
+	//m_PicType=::GetPrivateProfileInt("数据保存设置","图像格式",0,".//setting.ini");
+	//m_dateNum=::GetPrivateProfileInt("数据保存设置","保存天数",100,".//setting.ini");
+	//::GetPrivateProfileString("数据保存设置","数据保存路径",".//data",m_dataPath.GetBuffer(MAX_PATH),MAX_PATH,".//setting.ini");
 }
 
 PictureSave::~PictureSave(void)
@@ -35,10 +37,11 @@ int PictureSave::savePic(vector<cv::Mat> imgs)
 	CString strDate;
 	CString strTime;
 	getDateAndTime(strDate,strTime);
+	CString path = m_dataPath+strDate;
 
 	for (int i = 0; i < imgs.size(); i++)
 	{
-		savePic(imgs[i],strDate,strTime,i);
+		savePic(imgs[i],path,strTime,i);
 	}
 	return status;
 }
@@ -47,7 +50,8 @@ int PictureSave::UpdateParm()
 {
 	m_PicType=::GetPrivateProfileInt("数据保存设置","图像格式",0,".//setting.ini");
 	m_dateNum=::GetPrivateProfileInt("数据保存设置","保存天数",100,".//setting.ini");
-
+	::GetPrivateProfileString("数据保存设置","数据保存路径",".//data",m_dataPath.GetBuffer(MAX_PATH),MAX_PATH,".//setting.ini");
+	m_dataPath.ReleaseBuffer();
 	return 1;
 }
 int PictureSave::UpdateModel(ModelManage  *p_ModelManage)
@@ -137,7 +141,7 @@ void PictureSave::getDateAndTime(CString&date,CString&time)
 
 	CString strDate;
 	CString strTime;
-	strDate.Format(".\\data\\%4d-%2d-%2d",st.wYear,st.wMonth,st.wDay);
+	strDate.Format("\\%4d-%2d-%2d",st.wYear,st.wMonth,st.wDay);
 	strTime.Format("%2d_%2d_%2d_%3d",st.wHour,st.wMinute,st.wSecond,st.wMilliseconds);
 
 	date = strDate;
