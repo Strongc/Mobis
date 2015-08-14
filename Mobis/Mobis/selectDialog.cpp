@@ -254,18 +254,18 @@ void selectDialog::OnClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 	m_zoomCtrl.models.clear();
-	////m_zoomCtrl2.ptr_models.clear();
+	m_zoomCtrl2.models.clear();
 	POSITION pos = m_listctr.GetFirstSelectedItemPosition();;
 	int nIndex;
 	while(pos)
 	{
 		nIndex = m_listctr.GetNextSelectedItem(pos);
 		m_zoomCtrl.AddRelatedModel(current_xh.m_Models[nIndex]);
-		////	m_zoomCtrl2.AddRelatedModel(&current_xh.m_Models[nIndex]);
+		m_zoomCtrl2.AddRelatedModel(current_xh.m_Models[nIndex]);
 	}
 
 	m_zoomCtrl.Invalidate();
-	//m_zoomCtrl2.Invalidate();
+	m_zoomCtrl2.Invalidate();
 }
 
 void selectDialog::OnBnClickedSave()

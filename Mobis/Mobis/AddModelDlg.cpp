@@ -10,10 +10,11 @@ bool keepRectSafty(Rect rect,Size imgsize);
 
 IMPLEMENT_DYNAMIC(addModel2, CDialogEx)
 
-addModel2::addModel2(CWnd* pParent /*=NULL*/)
+	addModel2::addModel2(CWnd* pParent /*=NULL*/)
 	: CDialogEx(addModel2::IDD, pParent)
 	, m_slider_value(_T(""))
 	, m_checkID(0)
+	, m_isCameraLock(FALSE)
 {
 
 }
@@ -61,6 +62,7 @@ void addModel2::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CameraID, m_combo_CameraID);
 	DDX_Text(pDX, IDC_EDIT2, m_checkID);
 	DDV_MinMaxInt(pDX, m_checkID, 0, 1);
+	DDX_Check(pDX, IDC_CHECK_LockCamera, m_isCameraLock);
 }
 
 BOOL addModel2::OnInitDialog()
@@ -154,6 +156,8 @@ BEGIN_MESSAGE_MAP(addModel2, CDialogEx)
 
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
 	ON_EN_CHANGE(IDC_EDIT2, &addModel2::OnChangeEdit2)
+	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_CHECK_LockCamera, &addModel2::OnClickedCheckLockcamera)
 END_MESSAGE_MAP()
 
 
@@ -1000,3 +1004,55 @@ void addModel2::OnChangeEdit2()
 	UpdateData(true);
 	p_Model->m_cameraID = m_checkID;
 }   
+
+
+void addModel2::OnTimer(UINT_PTR nIDEvent)
+{
+	switch (nIDEvent) 
+	{      
+	case 1:    
+		{  
+			if(ChoosedSource==-1)
+			{
+
+			}
+			else if(ChoosedSource==0)
+			{
+				if(workPool_img.channels()==1)
+					cvtColor(workPool_img,work_img,CV_GRAY2RGB);
+				m_zoomCtrl.UpdateImage(work_img);
+
+
+			}
+			else if(ChoosedSource==1)
+			{
+				if(workPool_img2.channels()==1)
+					cvtColor(workPool_img2,work_img,CV_GRAY2RGB);
+				m_zoomCtrl.UpdateImage(work_img);
+
+			}    
+			break;   
+		}
+	default:      
+		break;      
+	}      
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void addModel2::OnClickedCheckLockcamera()
+{
+	UpdateData();
+	if(m_isCameraLock)//相机锁定，图像不跟新
+	{
+		KillTimer(1);        //关闭定时器1。
+	}
+	else 
+	{
+		SetTimer(1,100,NULL);//启动定时器1,定时时间是1秒
+	}
+
+	
+
+}

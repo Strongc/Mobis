@@ -41,7 +41,7 @@ public:
 	ExtPicture m_fuPicSearchRect;
 
 	
-
+	BOOL m_isCameraLock;
 	int m_checkID;
 	//数据成员
 	LeoPicture_For_AddModel m_zoomCtrl;
@@ -99,4 +99,7 @@ public:
 	void  choosePicSource(int ChoosedSource);
 	
 	afx_msg void OnChangeEdit2();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnClickedCheckLockcamera();
+	
 };
