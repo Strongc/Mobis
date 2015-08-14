@@ -11,7 +11,7 @@ public:
 	sheet_CameraSetPage();
 	virtual ~sheet_CameraSetPage();
 
-// Dialog Data
+	// Dialog Data
 	enum { IDD = IDD_Cam_set };
 
 protected:
@@ -21,8 +21,13 @@ protected:
 public:
 	int getData(CMobisDlg*pMaindata);
 public:
-	CMobisDlg* m_pMaindata;
-	int m_trigerType;
 	afx_msg void OnBnClickedAppytrigertype();
 	afx_msg void OnBnClickedConnectCam();
+	afx_msg void OnCustomdrawSliderExposure(NMHDR *pNMHDR, LRESULT *pResult);
+
+	CMobisDlg* m_pMaindata;
+	int m_trigerType;
+	NODE_HANDLE     m_hGainNode;                        // Handle to "GainRaw" node
+	NODE_HANDLE     m_hExposureNode;                    // Handle to "ExposureTimeRaw" node
+	afx_msg void OnCustomdrawSliderGain(NMHDR *pNMHDR, LRESULT *pResult);
 };

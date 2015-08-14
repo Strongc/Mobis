@@ -991,10 +991,12 @@ void  addModel2::choosePicSource(int ChoosedSource)
 	}
 
 	this->ChoosedSource = ChoosedSource;
+
+	OnChangeEdit2();
 }
 
 void addModel2::OnChangeEdit2()
 {
 	UpdateData(true);
 	p_Model->m_cameraID = m_checkID;
-}
+}   
