@@ -119,11 +119,10 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUILDMODEL, &CMobisDlg::OnBnClickedBuildmodel)
 	ON_BN_CLICKED(IDC_BT_ZHAOHAO, &CMobisDlg::OnBnClickedBtZhaohao)
-	ON_BN_CLICKED(IDC_BeginCheck, &CMobisDlg::OnBnClickedBegincheck)
 	ON_BN_CLICKED(IDC_CAMERA_SETTING, &CMobisDlg::OnBnClickedCameraSetting)
+	ON_BN_CLICKED(IDC_BeginCheck, &CMobisDlg::OnBnClickedBegincheck)
 	ON_CBN_SELCHANGE(IDC_list, &CMobisDlg::OnSelchangeList)
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
-	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CMobisDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CMobisDlg::OnBnClickedButton2)
 	//ON_BN_CLICKED(IDC_BUTTON3, &CMobisDlg::OnBnClickedButton3)
@@ -131,6 +130,7 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_starttest, &CMobisDlg::OnBnClickedstarttest)
 	ON_BN_CLICKED(IDC_stoptest, &CMobisDlg::OnBnClickedstoptest)
 	ON_WM_TIMER()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CMobisDlg message handlers
@@ -182,8 +182,8 @@ BOOL CMobisDlg::OnInitDialog()
 	//初始化PictureControl控件///////////////////////
 	for (int i = 0; i < m_zoomPics.size(); i++)
 	{
-		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
 		m_zoomPics[i].ID = i;
+		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
 	}
 
 
@@ -304,12 +304,18 @@ void CMobisDlg::OnBnClickedBuildmodel()
 	{
 		selectDialog dlg;
 		dlg.xinghaos = &AllXingHaos;
-		dlg.workPool_img = workPool_imgs[0];
-		dlg.workPool_img2 = workPool_imgs[1];
+		for (int i = 0; i < workPool_imgs.size(); i++)
+		{
+			dlg.workPool_imgs[i] = workPool_imgs[i];
+		}
+		dlg.m_pos = m_pos;
 		dlg.DoModal();
 
 
+
 		writeFlie();
+		if(dlg.m_pos>0&&dlg.m_pos<AllXingHaos.size())  //更新选择的灯的型号，当然要保证在合理范围内
+			m_pos = dlg.m_pos;
 		CurrentXinghao = AllXingHaos[m_pos];
 		for (int i = 0; i < m_zoomPics.size(); i++)
 		{

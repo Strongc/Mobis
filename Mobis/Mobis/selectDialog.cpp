@@ -6,10 +6,15 @@
 #include "AddModelDlg.h"
 IMPLEMENT_DYNAMIC(selectDialog, CDialogEx)
 
-	selectDialog::selectDialog(CWnd* pParent /*=NULL*/)
+selectDialog::selectDialog(CWnd* pParent /*=NULL*/)
 	: CDialogEx(selectDialog::IDD, pParent)
+	, m_isCameraLock(TRUE)
 {
+	m_pos=-1;
 
+	int ctrNum=2;
+	m_zoomPics.resize(ctrNum);
+	workPool_imgs.resize(ctrNum);
 }
 
 selectDialog::~selectDialog()
@@ -20,45 +25,43 @@ selectDialog::~selectDialog()
 void selectDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_PIC1, m_zoomCtrl);
-	DDX_Control(pDX, IDC_PIC2, m_zoomCtrl2);
+	DDX_Control(pDX, IDC_PIC1, m_zoomPics[0]);
+	DDX_Control(pDX, IDC_PIC2, m_zoomPics[1]);
 	DDX_Control(pDX, IDC_COMBO1, m_list_xinghao);
 	DDX_Text(pDX, IDC_EDIT_XH_NAME, m_curren_name);
 	DDX_Text(pDX, IDC_EDIT2, m_current_num);
 	DDV_MinMaxInt(pDX, m_current_num, 0, 20);
 	DDX_Control(pDX, IDC_LIST1, m_listctr);
+	DDX_Check(pDX, IDC_CHECK_Lock, m_isCameraLock);
 }
 
 BOOL selectDialog::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-
-
-
 	m_curren_name=_T("");
 	m_current_num=0;
-	m_pos=-1;
 
 	//初始化PictureControl控件///////////////////////
-	m_zoomCtrl.ID = 0;
-	m_zoomCtrl2.ID = 1;
-	if(!workPool_img.empty())
-		m_zoomCtrl.UpdateImage(workPool_img);
-	if(!workPool_img2.empty())
-		m_zoomCtrl2.UpdateImage(workPool_img2);
-	////更新型号列表框
-	//for (int i = 0; i < xinghaos->size(); i++)
-	//{
-	//	LPCTSTR str = (*xinghaos)[i].m_Describe.c_str(); 
-	//	m_list_xinghao.AddString(str);
-	//}
+	for (int i = 0; i < m_zoomPics.size(); i++)
+	{
+		m_zoomPics[i].ID = i;
+		m_zoomPics[i].UpdateImage(workPool_imgs[i]);  
+	}
+
 
 	//初始化工作区ModelManage变量
-	if(xinghaos->size()>0)
+	if(!xinghaos->empty())
 	{
-		m_pos= 0;
-		current_xh = (*xinghaos)[m_pos];
+		if (m_pos>0&&m_pos<xinghaos->size())
+		{
+			current_xh = (*xinghaos)[m_pos];
+		}
+		else
+		{
+			m_pos=0;
+			current_xh = (*xinghaos)[m_pos];
+		}
 	}
 	else 
 	{
@@ -71,11 +74,9 @@ BOOL selectDialog::OnInitDialog()
 	m_listctr.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	LONG lStyle;
 	lStyle = GetWindowLong(m_listctr.m_hWnd, GWL_STYLE);//获取当前窗口style
-	lStyle &= ~LVS_TYPEMASK; //清除显示方式位
-	lStyle |= LVS_REPORT; //设置style
+	lStyle &= ~LVS_TYPEMASK;	//清除显示方式位
+	lStyle |= LVS_REPORT;		//设置style
 	SetWindowLong(m_listctr.m_hWnd, GWL_STYLE, lStyle);//设置style
-
-
 	m_listctr.DeleteAllItems();//清空
 	m_listctr.InsertColumn(0,_T("位置"));//添加列
 	m_listctr.InsertColumn(1,_T("相机ID"));//添加列
@@ -88,7 +89,11 @@ BOOL selectDialog::OnInitDialog()
 	m_listctr.SetColumnWidth(3, 50);
 	m_listctr.SetColumnWidth(4, 120);
 	m_listctr.SetRedraw(FALSE);//防止重绘
+
+
 	myUpdata(false);
+
+	OnClickedCheckLock();
 	return TRUE;
 }
 
@@ -157,6 +162,8 @@ BEGIN_MESSAGE_MAP(selectDialog, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT_XH_NAME, &selectDialog::OnChangeEditXhName)
 	ON_NOTIFY(NM_CLICK, IDC_LIST1, &selectDialog::OnClickList1)
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
+	ON_BN_CLICKED(IDC_CHECK_Lock, &selectDialog::OnClickedCheckLock)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 void selectDialog::OnPaint()
@@ -235,9 +242,15 @@ void selectDialog::OnDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	//	CEdit* pEdit = m_listctr.EditLabel( tIndex );
 	//}
 
-	addModel2 p_addModelDlg ;
-	p_addModelDlg.workPool_img = workPool_img;
-	p_addModelDlg.workPool_img2 = workPool_img2;
+	//锁定相机，不跟新，否则会卡死
+	m_isCameraLock= TRUE;
+	UpdateData(FALSE);
+	OnClickedCheckLock();
+
+
+	addModel2 p_addModelDlg;
+	p_addModelDlg.workPool_img = workPool_imgs[0];
+	p_addModelDlg.workPool_img2 = workPool_imgs[1];
 	int index = pNMItemActivate->iItem;
 	p_addModelDlg.p_Model = &current_xh.m_Models[index];
 	p_addModelDlg.DoModal();
@@ -253,19 +266,19 @@ void selectDialog::OnClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 		return;
 
 
-	m_zoomCtrl.models.clear();
-	m_zoomCtrl2.models.clear();
+	m_zoomPics[0].models.clear();
+	m_zoomPics[1].models.clear();
 	POSITION pos = m_listctr.GetFirstSelectedItemPosition();;
 	int nIndex;
 	while(pos)
 	{
 		nIndex = m_listctr.GetNextSelectedItem(pos);
-		m_zoomCtrl.AddRelatedModel(current_xh.m_Models[nIndex]);
-		m_zoomCtrl2.AddRelatedModel(current_xh.m_Models[nIndex]);
+		m_zoomPics[0].AddRelatedModel(current_xh.m_Models[nIndex]);
+		m_zoomPics[1].AddRelatedModel(current_xh.m_Models[nIndex]);
 	}
 
-	m_zoomCtrl.Invalidate();
-	m_zoomCtrl2.Invalidate();
+	m_zoomPics[0].Invalidate();
+	m_zoomPics[1].Invalidate();
 }
 
 void selectDialog::OnBnClickedSave()
@@ -325,30 +338,61 @@ void selectDialog::OnChangeEditXhName()
 }
 
 
-
 LRESULT selectDialog::camera_buf_ready(WPARAM wParam, LPARAM lParam)
 {
 
 	if(wParam==0)
 	{
-
-
 		Mat rgb_img;
-		if(workPool_img.channels()==1)
-			cvtColor(workPool_img,rgb_img,CV_GRAY2RGB);
-		m_zoomCtrl.UpdateImage(rgb_img);
+		if(workPool_imgs[0].channels()==1)
+			cvtColor(workPool_imgs[0],rgb_img,CV_GRAY2RGB);
+		m_zoomPics[0].UpdateImage(rgb_img);
 
 	}
 	else if(wParam==1)
 	{
 		Mat rgb_img;
-		if(workPool_img2.channels()==1)
-			cvtColor(workPool_img2,rgb_img,CV_GRAY2RGB);
-		m_zoomCtrl2.UpdateImage(rgb_img);
+		if(workPool_imgs[1].channels()==1)
+			cvtColor(workPool_imgs[1],rgb_img,CV_GRAY2RGB);
+		m_zoomPics[1].UpdateImage(rgb_img);
 	}
-
-
 	return true;
 }
 
 
+void selectDialog::OnClickedCheckLock()
+{
+	UpdateData();
+	if(m_isCameraLock)//相机锁定，图像不跟新
+	{
+		KillTimer(1);        //关闭定时器1。
+	}
+	else 
+	{
+		SetTimer(1,100,NULL);//启动定时器1,定时时间是1秒
+	}
+}
+
+void selectDialog::OnTimer(UINT_PTR nIDEvent)
+{
+	switch (nIDEvent) 
+	{      
+	case 1:    
+		{  
+
+			for (int i = 0; i < workPool_imgs.size(); i++)
+			{
+				Mat rgb_img;
+				if(workPool_imgs[i].channels()==1)
+					cvtColor(workPool_imgs[i],rgb_img,CV_GRAY2RGB);
+				m_zoomPics[i].UpdateImage(rgb_img);
+
+			}
+			break; 
+		}
+	default:      
+		break;      
+	}      
+
+	CDialogEx::OnTimer(nIDEvent);
+}

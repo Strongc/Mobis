@@ -31,18 +31,18 @@ public:
 	ExtPicture m_Search_Rect;
 
 	ExtPicture m_zhengPic[3];
+	ExtPicture m_zhengPicSearchRect;
 	CString m_zhengRect[3];
 	CString m_zhengSearchRect[3];
-	ExtPicture m_zhengPicSearchRect;
+
 
 	ExtPicture m_fuPic[3];
+	ExtPicture m_fuPicSearchRect;
 	CString m_fuRect[3];
 	CString m_fuSearchRect[3];
-	ExtPicture m_fuPicSearchRect;
 
-	
-	BOOL m_isCameraLock;
-	int m_checkID;
+
+
 	//数据成员
 	LeoPicture_For_AddModel m_zoomCtrl;
 	Mat workPool_img;
@@ -50,9 +50,22 @@ public:
 	cv::Mat work_img;
 	Model *p_Model;
 
+	BOOL m_isCameraLock;//相机锁定
+	int m_checkID;		//要检测的相机编号
+
+	CComboBox m_combo_CameraID;
+	vector<int> picSources;  //picture控件图像的来源。文件；相机1；相机2；相机。。。
+	int ChoosedSource;
+
+	CSliderCtrl m_slider;
+	CString m_slider_value;
+
 	//标识变量
-	int m_ctl;
-	Point shift;
+	//添加模型时需要两个步骤，
+	//1选择添加什么模型：正的，负的，或正负导向，2 指定一个区域添加模型。
+	//两个步骤在不同函数中，所以要有个变量告诉第二个步骤。
+	int m_ctl;  
+	//Point shift;
 public:
 	BOOL OnInitDialog();
 	void UpdateControl();
@@ -87,19 +100,15 @@ public:
 
 	afx_msg void OnCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 
-	CSliderCtrl m_slider;
-	CString m_slider_value;
-	CComboBox m_combo_CameraID;
+
 	afx_msg void OnSelchangeCameraid();
 	LRESULT camera_buf_ready(WPARAM wParam, LPARAM lParam);
 
-	vector<int> picSources;  //picture控件图像的来源。文件；相机1；相机2；相机。。。
-	int ChoosedSource;
 
 	void  choosePicSource(int ChoosedSource);
-	
+
 	afx_msg void OnChangeEdit2();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnClickedCheckLockcamera();
-	
+
 };

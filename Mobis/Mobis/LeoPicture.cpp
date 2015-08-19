@@ -260,13 +260,16 @@ cv::Point LeoPicture::ImageToClient(cv::Point &pt)
 void LeoPicture::UpdateImage(cv::Mat image)
 {
 	EnterCriticalSection(&m_protect4m_img); 
-	if(image.rows==m_img.rows&&image.cols==m_img.cols)
+	Mat tempShow = image.clone();//显示时转换为彩色图像
+	if(image.channels()==1)
+		cvtColor(tempShow,tempShow,CV_GRAY2RGB);
+	if(tempShow.rows==m_img.rows&&tempShow.cols==m_img.cols)
 	{
-		m_img=image;
+		m_img=tempShow;
 	}
 	else 
 	{
-		m_img=image;
+		m_img=tempShow;
 		RectRoi = Rect(0,0,m_img.cols,m_img.rows);
 	}
 	LeaveCriticalSection(&m_protect4m_img); 

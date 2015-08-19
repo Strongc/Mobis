@@ -10,11 +10,11 @@ bool keepRectSafty(Rect rect,Size imgsize);
 
 IMPLEMENT_DYNAMIC(addModel2, CDialogEx)
 
-	addModel2::addModel2(CWnd* pParent /*=NULL*/)
+addModel2::addModel2(CWnd* pParent /*=NULL*/)
 	: CDialogEx(addModel2::IDD, pParent)
 	, m_slider_value(_T(""))
 	, m_checkID(0)
-	, m_isCameraLock(FALSE)
+	, m_isCameraLock(TRUE)
 {
 
 }
@@ -81,7 +81,7 @@ BOOL addModel2::OnInitDialog()
 	m_fuPic[1].m_ID =2002;
 	m_fuPic[2].m_ID =2003;
 
-	//更新组合框相机ID ，及数据源
+	//更新组合框相机ID，及数据源
 	picSources.push_back(-1);
 	if(!workPool_img.empty())
 	{
@@ -95,24 +95,37 @@ BOOL addModel2::OnInitDialog()
 		picSources.push_back(1);
 	}
 
+	//跟新检测目标
+	m_checkID = p_Model->m_cameraID;
+	UpdateData(FALSE);
 
 	//选择数据源
-	if(picSources.size()>=2)	
+	if (picSources.size()>m_checkID+1)  //根据模型m_cameraID选择数据源。这里看起来会比较绕。
 	{
-		m_combo_CameraID.SetCurSel(0); 
-		choosePicSource(picSources[1]);
+		m_combo_CameraID.SetCurSel(m_checkID); 
+		choosePicSource(picSources[m_checkID+1]);
 	}
-	else 
+	else
 	{
 		m_combo_CameraID.SetCurSel(-1);
 		choosePicSource(picSources[0]);
 	}
-	m_zoomCtrl.AddRelatedModel(*p_Model);
+
+	/*if(picSources.size()>=2)	
+	{
+	m_combo_CameraID.SetCurSel(0); 
+	choosePicSource(picSources[1]);
+	}
+	else 
+	{
+	m_combo_CameraID.SetCurSel(-1);
+	choosePicSource(picSources[0]);
+	}
+	m_zoomCtrl.AddRelatedModel(*p_Model);*/
 
 
 
-	//跟新检测目标
-	m_checkID = p_Model->m_cameraID;
+
 
 	m_slider.SetRange(1,50);
 	if(p_Model->m_pModels.size()>0)
@@ -138,8 +151,8 @@ BOOL addModel2::OnInitDialog()
 
 
 
-
 	UpdateControl();
+	OnClickedCheckLockcamera();
 	return true;
 }
 
@@ -153,7 +166,6 @@ BEGIN_MESSAGE_MAP(addModel2, CDialogEx)
 	ON_STN_CLICKED(IDC_RADIO2, &addModel2::OnStnClickedRadio2)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &addModel2::OnCustomdrawSlider1)
 	ON_CBN_SELCHANGE(IDC_CameraID, &addModel2::OnSelchangeCameraid)
-
 	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
 	ON_EN_CHANGE(IDC_EDIT2, &addModel2::OnChangeEdit2)
 	ON_WM_TIMER()
@@ -388,13 +400,15 @@ void addModel2::UpdateControl()
 	}
 
 
-	if(p_Model->Search_rect.area()!=0&&!work_img.empty())
+	if(p_Model->Search_rect.area()!=0&&!work_img.empty()&&
+		keepRectSafty(p_Model->Search_rect,Size(work_img.cols,work_img.rows)))
 	{
 		Mat showSearchregion(work_img,p_Model->Search_rect);
 		m_Search_Rect.loadImage(showSearchregion);
 	}
 	else
 		m_Search_Rect.loadImage(Mat());
+
 	UpdateData(false);
 
 
@@ -402,7 +416,8 @@ void addModel2::UpdateControl()
 	{
 
 
-		if(p_Model->m_pModels_SearchRects.size()>0&&!work_img.empty())
+		if(p_Model->m_pModels_SearchRects.size()>0&&!work_img.empty()
+			&&keepRectSafty(p_Model->getDModelSearchRect(),Size(work_img.cols,work_img.rows)))
 		{
 			Point shifft = calDirect();
 			Rect rrr = p_Model->getPModelSearchRects(0)+shifft;
@@ -417,7 +432,8 @@ void addModel2::UpdateControl()
 
 	if(!p_Model->getDModel2().empty())
 	{
-		if(p_Model->m_nModels_SearchRects.size()>0&&!work_img.empty())
+		if(p_Model->m_nModels_SearchRects.size()>0&&!work_img.empty()
+			&&keepRectSafty(p_Model->getDModelSearchRect2(),Size(work_img.cols,work_img.rows)))
 		{
 			Point shifft = calDirect2();
 			Rect rrr = p_Model->getNModelSearchRects(0)+shifft;
@@ -968,6 +984,7 @@ void  addModel2::choosePicSource(int ChoosedSource)
 	if(ChoosedSource==-1)
 	{
 		int d= m_combo_CameraID.SetCurSel(-1); 
+
 	}
 	else if(ChoosedSource==0)
 	{
@@ -979,6 +996,8 @@ void  addModel2::choosePicSource(int ChoosedSource)
 		if(work_img.channels()==1)
 			cvtColor(work_img,work_img,CV_GRAY2RGB);
 		m_zoomCtrl.UpdateImage(work_img);
+
+		UpdateControl();
 	}
 	else if(ChoosedSource==1)
 	{
@@ -992,6 +1011,8 @@ void  addModel2::choosePicSource(int ChoosedSource)
 		if(work_img.channels()==1)
 			cvtColor(work_img,work_img,CV_GRAY2RGB);
 		m_zoomCtrl.UpdateImage(work_img);
+
+		UpdateControl();
 	}
 
 	this->ChoosedSource = ChoosedSource;
@@ -1053,6 +1074,6 @@ void addModel2::OnClickedCheckLockcamera()
 		SetTimer(1,100,NULL);//启动定时器1,定时时间是1秒
 	}
 
-	
+
 
 }

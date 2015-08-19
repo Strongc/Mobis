@@ -36,14 +36,9 @@ protected:
 public:
 
 	//整体大图控件及变量
-
-	//LeoPicture_For_Main m_zoomPic;
-	//Mat workPool_img;
-	//LeoPicture_For_Main m_zoomPic2;
-	//Mat workPool_img2;
-
 	vector<LeoPicture_For_Main>m_zoomPics;
 	vector<Mat> workPool_imgs;
+
 	//区域图，状态结果的控件及图像变量
 	CStatic m_pics[20];
 	CStatic m_status[20];
