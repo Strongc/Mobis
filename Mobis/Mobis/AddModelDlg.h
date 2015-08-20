@@ -94,10 +94,6 @@ public:
 	afx_msg void OnBnClickedChoosePic();
 	Rect getModelRectFromID(Model * model,int ID);
 	Mat getModelFromID(Model * model,int ID);
-	afx_msg void OnBnClickedCheck2();
-	afx_msg void OnStnClickedRadio2();
-
-
 	afx_msg void OnCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 
 

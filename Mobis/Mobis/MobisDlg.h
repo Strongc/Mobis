@@ -70,7 +70,7 @@ public:
 	HANDLE m_hCheckEvent;
 	HANDLE m_hCheckThread;
 
-
+	
 
 
 	//相机管理对象

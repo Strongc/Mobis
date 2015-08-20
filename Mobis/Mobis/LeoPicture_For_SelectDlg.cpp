@@ -50,7 +50,7 @@ void LeoPicture_For_SelectDlg::Draw(CDC *pDC)
 
 	HDC hDC=pDC->GetSafeHdc();	
 	iimg.DrawToHDC(hDC,&myrect);
-
+	ReleaseDC( pDC );
 
 	if(m_RectTracker!=NULL)
 		m_RectTracker->Draw(pDC);

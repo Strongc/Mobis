@@ -213,6 +213,7 @@ void LeoPicture::Draw(CDC *pDC)
 
 	HDC hDC=pDC->GetSafeHdc();	
 	iimg.DrawToHDC(hDC,&rClient);
+	ReleaseDC( pDC );
 
 
 	if(m_RectTracker!=NULL)

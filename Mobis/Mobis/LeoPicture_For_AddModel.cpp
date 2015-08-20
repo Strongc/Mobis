@@ -55,7 +55,7 @@ void LeoPicture_For_AddModel::Draw(CDC *pDC)
 
 	HDC hDC=pDC->GetSafeHdc();	
 	iimg.DrawToHDC(hDC,&myrect);
-
+	ReleaseDC( pDC );
 
 	if(m_RectTracker!=NULL)
 		m_RectTracker->Draw(pDC);

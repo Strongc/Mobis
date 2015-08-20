@@ -156,6 +156,7 @@ bool PictureSave::openDataBase()
 		return false;
 	if(!openRecordset())
 		return false;
+	return true;
 
 }
 
@@ -166,6 +167,7 @@ bool PictureSave::closeDataBase()
 	if(!closeConnection())
 		return false;
 	CoUninitialize();
+	return true;
 }
 
 bool PictureSave::openConnection()
@@ -176,6 +178,7 @@ bool PictureSave::openConnection()
 
 	CoInitialize(NULL);
 	m_pConnection.CreateInstance(__uuidof(Connection));
+
 	// 在ADO操作中建议语句中要常用try...catch()来捕获错误信息，
 	// 因为它有时会经常出现一些想不到的错误。jingzhou xu
 	try                 
@@ -188,10 +191,7 @@ bool PictureSave::openConnection()
 		AfxMessageBox("读取数据库,创建ADO连接失败!");///显示错误信息
 		return FALSE;
 	}
-
-
 	return true;
-
 }
 
 bool PictureSave::closeConnection()
@@ -209,7 +209,7 @@ bool PictureSave::openRecordset()
 	// 使用ADO创建数据库记录集
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	// 在ADO操作中建议语句中要常用try...catch()来捕获错误信息，
-	// 因为它有时会经常出现一些想不到的错误。jingzhou xu
+	// 因为它有时会经常出现一些想不到的错误。
 	try
 	{
 		m_pRecordset->Open("SELECT * FROM  picture",                // 查询DemoTable表中所有字段
@@ -295,6 +295,7 @@ int PictureSave::getPicDateNum()
 
 	int num = m_pRecordset->GetCollect("NUM");
 
+	closeRecordset();
 	closeConnection();
 
 	return num;
@@ -385,7 +386,7 @@ bool PictureSave::deleteDBdir(CString strDir)
 		AfxMessageBox(_T("数据库deleteDBdir异常"));
 		return false;
 	}
-
+	closeRecordset();
 	closeConnection();
 
 	return 1;
@@ -462,10 +463,7 @@ bool PictureSave::addPicToDB(CString name,CString dir,CString path,CString addin
 	m_pRecordset->PutCollect("add",_variant_t(addin));
 	m_pRecordset->Update();
 
-	if(m_pRecordset->State)
-		m_pRecordset->Close();
-	m_pRecordset = NULL;
-
+	closeRecordset();
 	closeConnection();
 	return true;
 }

@@ -128,13 +128,13 @@ BOOL addModel2::OnInitDialog()
 
 
 	m_slider.SetRange(1,50);
-	if(p_Model->m_pModels.size()>0)
+	if(!p_Model->m_pModels.empty())
 	{
 		Rect rect = p_Model->getPModelRects(0);
 		Rect SearchRect = p_Model->getPModelSearchRects(0);
 		m_slider.SetPos(SearchRect.width-rect.width);
 	}
-	else if(p_Model->m_nModels.size()>0)
+	else if(!p_Model->m_nModels.empty())
 	{
 		Rect rect = p_Model->getNModelRects(0);
 		Rect SearchRect = p_Model->getNModelSearchRects(0);
@@ -162,14 +162,12 @@ BEGIN_MESSAGE_MAP(addModel2, CDialogEx)
 	ON_MESSAGE(WM_ZOOMCTRL_LDCLICK,OnMessage_ZoomPicture_add) 
 	ON_MESSAGE(WM_ZOOMCTRL_RCLICK,OnMessage_ZoomPicture_cancel) 
 	ON_BN_CLICKED(IDC_CHOOSE_PIC, &addModel2::OnBnClickedChoosePic)
-	ON_BN_CLICKED(IDC_CHECK2, &addModel2::OnBnClickedCheck2)
-	ON_STN_CLICKED(IDC_RADIO2, &addModel2::OnStnClickedRadio2)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &addModel2::OnCustomdrawSlider1)
 	ON_CBN_SELCHANGE(IDC_CameraID, &addModel2::OnSelchangeCameraid)
-	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
 	ON_EN_CHANGE(IDC_EDIT2, &addModel2::OnChangeEdit2)
-	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_CHECK_LockCamera, &addModel2::OnClickedCheckLockcamera)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &addModel2::OnCustomdrawSlider1)
+	ON_MESSAGE(WM_DATA_READY,camera_buf_ready) 
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -736,6 +734,96 @@ void addModel2::delete_NModel(Model * model,int PIC_ID)
 }
 
 
+void  addModel2::choosePicSource(int ChoosedSource)
+{
+	if(ChoosedSource==-1)
+	{
+		int d= m_combo_CameraID.SetCurSel(-1); 
+
+	}
+	else if(ChoosedSource==0)
+	{
+		m_checkID =0;
+		UpdateData(false);
+		int d= m_combo_CameraID.SetCurSel(0); 
+
+		work_img = workPool_img;
+		if(work_img.channels()==1)
+			cvtColor(work_img,work_img,CV_GRAY2RGB);
+		m_zoomCtrl.UpdateImage(work_img);
+
+		UpdateControl();
+	}
+	else if(ChoosedSource==1)
+	{
+
+		m_checkID =1;
+		UpdateData(false);
+
+		int d= m_combo_CameraID.SetCurSel(1); 
+
+		work_img = workPool_img2;
+		if(work_img.channels()==1)
+			cvtColor(work_img,work_img,CV_GRAY2RGB);
+		m_zoomCtrl.UpdateImage(work_img);
+
+		UpdateControl();
+	}
+
+	this->ChoosedSource = ChoosedSource;
+
+	OnChangeEdit2();
+}
+void addModel2::OnSelchangeCameraid()
+{
+	int nSel = m_combo_CameraID.GetCurSel();  
+	choosePicSource(nSel);
+}
+void addModel2::OnChangeEdit2()
+{
+	UpdateData(true);
+	p_Model->m_cameraID = m_checkID;
+}  
+void addModel2::OnClickedCheckLockcamera()
+{
+	UpdateData();
+	if(m_isCameraLock)//相机锁定，图像不跟新
+	{
+		KillTimer(1);        //关闭定时器1。
+	}
+	else 
+	{
+		SetTimer(1,100,NULL);//启动定时器1,定时时间是1秒
+	}
+}
+void addModel2::OnCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	int nPos = m_slider.GetPos(); 
+	CString str;
+	str.Format("%d",nPos);
+	m_slider_value=str;
+	UpdateData(false);
+
+	for (int i = 0; i < p_Model->m_pModels.size(); i++)
+	{
+		Rect rect = p_Model->getPModelRects(i);
+		p_Model->m_pModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
+
+	}
+
+	for (int i = 0; i < p_Model->m_nModels.size(); i++)
+	{
+		Rect rect = p_Model->getNModelRects(i);
+		p_Model->m_nModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
+	}
+
+	UpdateControl();
+}
+
 Point addModel2::calDirect()
 {
 	//计算导向模板偏移
@@ -760,7 +848,6 @@ Point addModel2::calDirect()
 	/***********************************************************************/
 	return direct_shifft;
 }
-
 Point addModel2::calDirect2()
 {
 	//计算导向模板偏移
@@ -855,13 +942,6 @@ Rect addModel2::getModelRectFromID(Model * model,int ID)
 		return Rect(0,0,0,0);
 }
 
-void addModel2::OnBnClickedCheck2()
-{
-	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK2);
-	int state = pBtn->GetCheck();
-
-
-}
 
 Rect amplifyRrect(Rect rect,double m_factor,double f_x,double f_y)
 {
@@ -908,51 +988,12 @@ Rect amplifyRrect(Rect rect,double m_factor,double f_x,double f_y)
 
 }
 
-void addModel2::OnStnClickedRadio2()
-{
-	// TODO: Add your control notification handler code here
-}
-
-void addModel2::OnCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Add your control notification handler code here
-	*pResult = 0;
-
-	int nPos = m_slider.GetPos(); 
-	CString str;
-	str.Format("%d",nPos);
-	m_slider_value=str;
-	UpdateData(false);
-
-	for (int i = 0; i < p_Model->m_pModels.size(); i++)
-	{
-		Rect rect = p_Model->getPModelRects(i);
-		p_Model->m_pModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
-
-	}
-
-	for (int i = 0; i < p_Model->m_nModels.size(); i++)
-	{
-		Rect rect = p_Model->getNModelRects(i);
-		p_Model->m_nModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
-	}
-
-	UpdateControl();
-}
-
 bool keepRectSafty(Rect rect,Size imgsize)
 {
 	if(rect.x<0||rect.y<0||rect.x+rect.width>imgsize.width||rect.y+rect.height>imgsize.height)
 		return false;
 	else
 		return true;
-}
-
-void addModel2::OnSelchangeCameraid()
-{
-	int nSel = m_combo_CameraID.GetCurSel();  
-	choosePicSource(nSel);
 }
 
 LRESULT addModel2::camera_buf_ready(WPARAM wParam, LPARAM lParam)
@@ -978,54 +1019,6 @@ LRESULT addModel2::camera_buf_ready(WPARAM wParam, LPARAM lParam)
 	}
 	return true;
 }
-
-void  addModel2::choosePicSource(int ChoosedSource)
-{
-	if(ChoosedSource==-1)
-	{
-		int d= m_combo_CameraID.SetCurSel(-1); 
-
-	}
-	else if(ChoosedSource==0)
-	{
-		m_checkID =0;
-		UpdateData(false);
-		int d= m_combo_CameraID.SetCurSel(0); 
-
-		work_img = workPool_img;
-		if(work_img.channels()==1)
-			cvtColor(work_img,work_img,CV_GRAY2RGB);
-		m_zoomCtrl.UpdateImage(work_img);
-
-		UpdateControl();
-	}
-	else if(ChoosedSource==1)
-	{
-
-		m_checkID =1;
-		UpdateData(false);
-
-		int d= m_combo_CameraID.SetCurSel(1); 
-
-		work_img = workPool_img2;
-		if(work_img.channels()==1)
-			cvtColor(work_img,work_img,CV_GRAY2RGB);
-		m_zoomCtrl.UpdateImage(work_img);
-
-		UpdateControl();
-	}
-
-	this->ChoosedSource = ChoosedSource;
-
-	OnChangeEdit2();
-}
-
-void addModel2::OnChangeEdit2()
-{
-	UpdateData(true);
-	p_Model->m_cameraID = m_checkID;
-}   
-
 
 void addModel2::OnTimer(UINT_PTR nIDEvent)
 {
@@ -1062,18 +1055,4 @@ void addModel2::OnTimer(UINT_PTR nIDEvent)
 }
 
 
-void addModel2::OnClickedCheckLockcamera()
-{
-	UpdateData();
-	if(m_isCameraLock)//相机锁定，图像不跟新
-	{
-		KillTimer(1);        //关闭定时器1。
-	}
-	else 
-	{
-		SetTimer(1,100,NULL);//启动定时器1,定时时间是1秒
-	}
 
-
-
-}
