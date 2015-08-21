@@ -112,11 +112,7 @@ bool camera_jai::startCapture()
 		}
 	}
 
-	//int64_t int64Valt=10;
-	//J_Camera_SetValueInt64(m_hCam, (int8_t*)"AcquisitionFrameRateAbs",int64Valt);
-	//
-	//int64_t int64Valout;
-	//J_Camera_GetValueInt64(m_hCam, (int8_t*)"AcquisitionFrameRateAbs",&int64Valout);
+
 
 
 	J_STATUS_TYPE	status = J_ST_SUCCESS;
@@ -510,8 +506,6 @@ bool camera_jai::changeAcquitionModel(int trigSetting)
 {
 	m_TrigSetting = trigSetting;
 	stopCapture();
-	closeCamera();
-	openCamera();
 	settingCamera();
 	startCapture();
 

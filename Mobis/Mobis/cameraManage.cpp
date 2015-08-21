@@ -8,10 +8,8 @@ cameraManage::cameraManage(void)
 
 cameraManage::~cameraManage(void)
 {
-	for (int i = 0; i < m_cameraList.size(); i++)
-	{
-		m_cameraList[i].~camera_jai();
-	}
+
+	m_cameraList.clear();
 	closeFactory();
 }
 
