@@ -40,7 +40,7 @@ END_MESSAGE_MAP()
 
 void LeoPicture::OnPaint()
 {
-	
+
 	CPaintDC dc(this);
 	EnterCriticalSection(&m_protect4m_img); 
 	Draw(&dc);
@@ -276,9 +276,15 @@ void LeoPicture::UpdateImage(cv::Mat image)
 	LeaveCriticalSection(&m_protect4m_img); 
 
 
-	CRect rect;
-	GetClientRect(rect);  
-	InvalidateRect(rect);
+
+	if (::IsWindow(m_hWnd))
+	{
+		CRect rect;
+		GetClientRect(rect);
+		InvalidateRect(rect);
+	}
+
+	//InvalidateRect(rect);
 	//Invalidate();
 	/*CClientDC dc(this);
 	EnterCriticalSection(&m_protect4m_img); 

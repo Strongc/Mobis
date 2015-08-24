@@ -376,45 +376,50 @@ unsigned CMobisDlg:: CheckThread(void*params)
 	{
 		//获取图像///////////////////////////////////////////////////////////////////////////////
 		vector<Mat>images; 
+		pCMobisDlg->getImages(images);
+		//int num = pCMobisDlg->m_cameraManage.m_cameraList.size();
+		//if (num>0 )  //有相机
+		//{
+		//	if(pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
+		//	{
+		//		for (int i = 0; i < num; i++)
+		//		{
+		//			pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
+		//			ResetEvent(g_ReadyChecks[i]);     //同步
+		//		}
+		//	}
+		//	else
+		//	{
+		//		for (int i = 0; i < num; i++)
+		//		{
+		//			ResetEvent(g_ReadyChecks[i]);     //同步
+		//		}
+		//	}
 
-		int num = pCMobisDlg->m_cameraManage.m_cameraList.size();
-		if (num>0 )  //有相机
-		{
-			if(pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
-			{
-				for (int i = 0; i < num; i++)
-				{
-					pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
-					ResetEvent(g_ReadyChecks[i]);     //同步
-				}
-			}
-			else
-			{
-				for (int i = 0; i < num; i++)
-				{
-					ResetEvent(g_ReadyChecks[i]);     //同步
-				}
 
-			}
+		//	for (int i = 0; i < num; i++)
+		//	{
+		//		if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
+		//		{
+		//			images.push_back(pCMobisDlg->workPool_imgs[i].clone());
+
+		//		}
+		//	}
+		//}
+		//else if(num==0)//无相机，检测指定图片
+		//{
+		//	for (int i = 0; i <pCMobisDlg->workPool_imgs.size(); i++)
+		//	{
+		//		images.push_back(pCMobisDlg->workPool_imgs[i].clone());
+		//	}
+		//}
 
 
-			for (int i = 0; i < num; i++)
-			{
-				if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
-				{
-					images.push_back(pCMobisDlg->workPool_imgs[i].clone());
 
-				}
-			}
-		}
-		else if(num==0)//无相机，检测指定图片
-		{
-			for (int i = 0; i <pCMobisDlg->workPool_imgs.size(); i++)
-			{
-				images.push_back(pCMobisDlg->workPool_imgs[i].clone());
-			}
-		}
-		
+
+
+
+
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//擦除检测区域图像
 		for (int i = 0; i < 20; i++)
@@ -600,7 +605,7 @@ unsigned CMobisDlg:: FindCameraThread(void*params)
 {
 	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
 
-	while(pCMobisDlg->m_cameraManage.m_cameraIDList.size()<1)
+	while(pCMobisDlg->m_cameraManage.m_cameraIDList.size()<4)
 	{
 		pCMobisDlg->m_cameraManage.findCamera();
 		Sleep(800);
@@ -630,10 +635,8 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 
 				if(rgb_img.channels()==1)
 					cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
-				if(::IsWindowEnabled( pCMobisDlg->m_zoomPics[camID].GetSafeHwnd()))
-				{
-					pCMobisDlg->m_zoomPics[camID].UpdateImage(rgb_img);
-				}
+				pCMobisDlg->m_zoomPics[camID].UpdateImage(rgb_img);
+
 				Sleep(100);  //控制显示速度，太快UI线程会卡
 			}
 		}
@@ -1037,3 +1040,64 @@ void CMobisDlg::OnBnClickedButton2()
 //
 //
 //}
+
+
+
+int CMobisDlg::timeOutNum = 0;
+void CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
+{
+	int num = m_cameraManage.m_cameraList.size();
+	if (num>0 )  //有相机
+	{
+		for (int i = 0; i < tryNum; i++) //尝试tryNUm次
+		{
+
+			if(m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
+			{
+				for (int i = 0; i < num; i++)
+				{
+					m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
+					ResetEvent(g_ReadyChecks[i]);     //同步
+				}
+			}
+			else
+			{
+				for (int i = 0; i < num; i++)
+				{
+					ResetEvent(g_ReadyChecks[i]);     //同步
+				}
+
+			}
+
+
+
+			DWORD  ret = WaitForMultipleObjects(num,&g_ReadyChecks[0],true,timeOut);
+			if(ret==WAIT_OBJECT_0)
+			{
+				for (int i = 0; i < num; i++)
+				{
+					images.push_back(workPool_imgs[i].clone());
+				}
+
+				break;
+
+			}
+			else if (ret==WAIT_TIMEOUT)
+			{
+				//继续try
+
+				timeOutNum++;
+			}
+		}
+
+
+	}
+	else if(num==0)//无相机，检测指定图片
+	{
+		for (int i = 0; i <workPool_imgs.size(); i++)
+		{
+			images.push_back(workPool_imgs[i].clone());
+		}
+	}
+
+}

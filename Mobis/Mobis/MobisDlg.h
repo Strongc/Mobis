@@ -124,4 +124,7 @@ public:
 	afx_msg void OnBnClickedstoptest();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	/////////////////////////////////////////////////////
+
+	static int timeOutNum ;
+	void getImages(vector<Mat> &images,DWORD timeOut=2000,int tryNum=2);
 };

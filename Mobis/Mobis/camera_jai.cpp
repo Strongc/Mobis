@@ -64,6 +64,7 @@ bool camera_jai::openCamera()
 			return false;
 		}
 
+		
 		//Make sure streaming is supported!
 		uint32_t numStreams = 0;
 		status = J_Camera_GetNumOfDataStreams(m_hCam, &numStreams);
@@ -148,20 +149,22 @@ bool camera_jai::startCapture()
 	//if(retval != J_ST_SUCCESS) 
 	//{
 	//	ShowErrorMsg(CString("Could not open View Window!"), retval);
-	//	return;
+	//	return false;
 	//}
 	//retval = J_Image_OpenStreamLight(m_hCam, 0, &m_hThread);
 	//if(retval != J_ST_SUCCESS) 
 	//{
 	//	ShowErrorMsg(CString("Could not open StreamLight!"), retval);
-	//	return;
+	//	return false;
 	//}
 	//retval = J_Camera_ExecuteCommand(m_hCam, (int8_t*)"AcquisitionStart");
 	//if(retval != J_ST_SUCCESS) 
 	//{
 	//	ShowErrorMsg(CString("Could not Start Acquisition!"), retval);
-	//	return;
+	//	return false;
 	//}
+	//
+	//while(1);
 	////////////////////////////////////////////////////////////////////////////////////////
 
 
