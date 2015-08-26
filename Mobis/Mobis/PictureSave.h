@@ -6,8 +6,6 @@ using namespace cv;
 using namespace std;
 
 
-
-
 class PictureSave
 {
 public:

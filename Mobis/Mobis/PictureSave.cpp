@@ -9,6 +9,8 @@ PictureSave::PictureSave(void)
 	int errospace = 50;	   //磁盘空间小于50M 将出错
 	m_ModelManage=NULL;
 	UpdateParm();
+
+	openConnection();
 	//m_PicType=::GetPrivateProfileInt("数据保存设置","图像格式",0,".//setting.ini");
 	//m_dateNum=::GetPrivateProfileInt("数据保存设置","保存天数",100,".//setting.ini");
 	//::GetPrivateProfileString("数据保存设置","数据保存路径",".//data",m_dataPath.GetBuffer(MAX_PATH),MAX_PATH,".//setting.ini");
@@ -16,6 +18,7 @@ PictureSave::PictureSave(void)
 
 PictureSave::~PictureSave(void)
 {
+	closeConnection();
 }
 
 
@@ -54,6 +57,7 @@ int PictureSave::UpdateParm()
 	m_dataPath.ReleaseBuffer();
 	return 1;
 }
+
 int PictureSave::UpdateModel(ModelManage  *p_ModelManage)
 {
 	if(p_ModelManage==NULL)
@@ -176,6 +180,7 @@ bool PictureSave::openConnection()
 	//if(AfxOleGetMessageFilter()   !=   NULL)
 	//	AfxOleInit();
 
+
 	CoInitialize(NULL);
 	m_pConnection.CreateInstance(__uuidof(Connection));
 
@@ -254,7 +259,7 @@ bool PictureSave::closeRecordset()
 int PictureSave::getPicNum()
 {
 
-	openConnection();
+	//openConnection();
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	CString strSQL;
 	strSQL.Format(_T("SELECT COUNT(*) AS NUM FROM picture"));
@@ -270,15 +275,15 @@ int PictureSave::getPicNum()
 	}
 
 	int num = m_pRecordset->GetCollect("NUM");
-
-	closeConnection();
+	closeRecordset();
+	//closeConnection();
 
 	return num;
 }
 
 int PictureSave::getPicDateNum()
 {
-	openConnection();
+	//openConnection();
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	CString strSQL;
 	strSQL.Format(_T("Select Count(*) AS num from( select * from (select distinct dir from picture) )  "));
@@ -296,7 +301,7 @@ int PictureSave::getPicDateNum()
 	int num = m_pRecordset->GetCollect("NUM");
 
 	closeRecordset();
-	closeConnection();
+	//closeConnection();
 
 	return num;
 }
@@ -335,7 +340,7 @@ double PictureSave::GetFreeSpace_MB(CString dir)
 CString PictureSave::getEarliestDate()
 {
 
-	openConnection();
+	//openConnection();
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	CString strSQL;
 	strSQL.Format(_T("SELECT TOP 1 * from picture"));
@@ -355,8 +360,8 @@ CString PictureSave::getEarliestDate()
 	_variant_t var = m_pRecordset->GetCollect("dir");
 	if(var.vt != VT_NULL)
 		dir = (LPCSTR)_bstr_t(var);
-
-	closeConnection();
+	closeRecordset();
+	//closeConnection();
 
 	return dir;
 }
@@ -372,7 +377,7 @@ int PictureSave::deleteDbAndDir(CString strDir)
 bool PictureSave::deleteDBdir(CString strDir)
 {
 
-	openConnection();
+	//openConnection();
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	CString strSQL;
 	strSQL.Format(_T("DELETE  from picture where dir = '%s'"),strDir);
@@ -387,7 +392,7 @@ bool PictureSave::deleteDBdir(CString strDir)
 		return false;
 	}
 	closeRecordset();
-	closeConnection();
+	//closeConnection();
 
 	return 1;
 }
@@ -437,7 +442,8 @@ int PictureSave::addPicToDbAndDir(Mat img,CString name,CString dir,CString path,
 bool PictureSave::addPicToDB(CString name,CString dir,CString path,CString addin)
 {
 
-	openConnection();
+	//openConnection();
+
 	// 使用ADO创建数据库记录集
 	m_pRecordset.CreateInstance(__uuidof(Recordset));
 	// 在ADO操作中建议语句中要常用try...catch()来捕获错误信息，
@@ -464,7 +470,7 @@ bool PictureSave::addPicToDB(CString name,CString dir,CString path,CString addin
 	m_pRecordset->Update();
 
 	closeRecordset();
-	closeConnection();
+	//closeConnection();
 	return true;
 }
 
