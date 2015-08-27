@@ -30,7 +30,7 @@ public:
 	cv::Point			ClientToImage(CPoint &pt);
 	cv::Point			ImageToClient(cv::Point &pt);
 
-	CRITICAL_SECTION  m_protect4m_img;
+	CRITICAL_SECTION  m_protect4m_img;  //在此类中保护m_img变量 Draw，UpdateImage使用了。 在类外就无能为力了
 	cv::Mat  m_img;
 	cv::Rect RectRoi;
 	LeoRectTracker		*m_RectTracker;
