@@ -7,11 +7,15 @@ void histMatchTemplate( InputArray _img, InputArray _templ, OutputArray _result 
 myAlgorithm_ncc::myAlgorithm_ncc()
 {
 	p_model=NULL;
+	param =0.0;
 }
 
 myAlgorithm_ncc::myAlgorithm_ncc(ModelManage * model)
 {
+	param =0.0;
+	p_model=NULL;
 	loadModel(model);
+	loadParam();
 }
 
 myAlgorithm_ncc::~myAlgorithm_ncc()
@@ -24,6 +28,13 @@ void myAlgorithm_ncc::loadModel(ModelManage * model)
 	result.clear();
 	result.resize(p_model->m_Models.size());
 	clearResult(result);
+}
+
+void myAlgorithm_ncc::loadParam()
+{
+	CString str;
+	::GetPrivateProfileStringA("算法参数设置","算法参数1",".//data",str.GetBuffer(MAX_PATH),MAX_PATH,".//setting.ini");
+	param = _ttof(str);
 }
 
 bool myAlgorithm_ncc::templateMatching(cv::Mat &image)
@@ -435,7 +446,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 		result[i].n_max_pt = nmax_pt;
 
 
-		double minGap=0.00;
+		double minGap=param;
 		if (result[i].p_max>result[i].n_max&&result[i].p_max-result[i].n_max>minGap)
 		{
 			result[i].result=1;

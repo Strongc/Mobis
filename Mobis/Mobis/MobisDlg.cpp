@@ -7,6 +7,7 @@
 #include"sheet_Seting.h"
 #include<fstream> 
 #include "afxdialogex.h"
+#include"Algorithm_Seting.h"
 
 
 #ifdef _DEBUG
@@ -131,6 +132,7 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_stoptest, &CMobisDlg::OnBnClickedstoptest)
 	ON_WM_TIMER()
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_Algorithm_SETTING, &CMobisDlg::OnBnClickedAlgorithmSetting)
 END_MESSAGE_MAP()
 
 // CMobisDlg message handlers
@@ -165,7 +167,7 @@ BOOL CMobisDlg::OnInitDialog()
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	GetClientRect(&m_rect);  //获取对话框的大小
-	int id[]={IDC_STATIC_admin,IDC_IMG,IDC_IMG2,IDC_BT_ZHAOHAO,IDC_BUILDMODEL,IDC_CAMERA_SETTING,IDC_STATIC_checkNum,IDC_list,
+	int id[]={IDC_STATIC_admin,IDC_IMG,IDC_IMG2,IDC_BT_ZHAOHAO,IDC_BUILDMODEL,IDC_CAMERA_SETTING,IDC_Algorithm_SETTING,IDC_STATIC_checkNum,IDC_list,
 		IDC_STATIC_1,IDC_STATIC_2,IDC_STATIC_3,IDC_STATIC_4,IDC_STATIC_5,IDC_STATIC_6,IDC_STATIC_7,IDC_STATIC_8,IDC_STATIC_9,IDC_STATIC_10,
 		IDC_STATIC_11,IDC_STATIC_12,IDC_STATIC_13,IDC_STATIC_14,IDC_STATIC_15,IDC_STATIC_16,IDC_STATIC_17,IDC_STATIC_18,IDC_STATIC_19,IDC_STATIC_20,
 		IDC_status1,IDC_status2,IDC_status3,IDC_status4,IDC_status5,IDC_status6,IDC_status7,IDC_status8,IDC_status9,IDC_status10,
@@ -360,6 +362,21 @@ void CMobisDlg::OnSelchangeList()
 	}
 	myUpdata(false);
 }
+
+void CMobisDlg::OnBnClickedCameraSetting()
+{
+
+	sheet_Seting  SettingDlg(this);
+	SettingDlg.DoModal();
+
+}
+
+void CMobisDlg::OnBnClickedAlgorithmSetting()
+{
+	Algorithm_Seting  Algorithm_SetingDlg;
+	Algorithm_SetingDlg.DoModal();;
+}
+
 
 void CMobisDlg::OnBnClickedBegincheck()
 {
@@ -815,13 +832,7 @@ LRESULT CMobisDlg::camera_buf_ready(WPARAM wParam, LPARAM lParam)
 	return true;
 }
 
-void CMobisDlg::OnBnClickedCameraSetting()
-{
 
-	sheet_Seting  SettingDlg(this);
-	SettingDlg.DoModal();
-
-}
 
 
 
@@ -1101,3 +1112,4 @@ void CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 	}
 
 }
+

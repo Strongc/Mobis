@@ -127,4 +127,5 @@ public:
 
 	static int timeOutNum ;
 	void getImages(vector<Mat> &images,DWORD timeOut=2000,int tryNum=2);
+	afx_msg void OnBnClickedAlgorithmSetting();
 };

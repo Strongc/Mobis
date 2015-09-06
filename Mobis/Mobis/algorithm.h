@@ -27,6 +27,7 @@ public:
 	~myAlgorithm_ncc();
 
 	void loadModel(ModelManage * model);
+	void loadParam();
 	bool templateMatching(cv::Mat &image);
 	vector<int> getValueResult();
 	vector<myresult> getAllResult();
@@ -34,7 +35,7 @@ public:
 private:
 	ModelManage *p_model;
 	vector< myresult> result;
-
+	double param;   //通过系数
 
 	void clearResult(vector< myresult> &result);
 	void uniformChannelFromModel(Mat &image,Mat &temp);

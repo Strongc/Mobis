@@ -112,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddModelDlg.h" />
+    <ClInclude Include="Algorithm_Seting.h" />
     <ClInclude Include="LeoPicture_For_AddModel.h" />
     <ClInclude Include="algorithm.h" />
     <ClInclude Include="cameraManage.h" />
@@ -142,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddModelDlg.cpp" />
+    <ClCompile Include="Algorithm_Seting.cpp" />
     <ClCompile Include="LeoPicture_For_AddModel.cpp" />
     <ClCompile Include="algorithm.cpp" />
     <ClCompile Include="cameraManage.cpp" />
