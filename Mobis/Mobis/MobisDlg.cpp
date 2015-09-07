@@ -57,6 +57,14 @@ CMobisDlg::CMobisDlg(CWnd* pParent /*=NULL*/): CDialogEx(CMobisDlg::IDD, pParent
 
 }
 
+
+CMobisDlg::~CMobisDlg()
+{
+
+
+
+
+}
 void CMobisDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -222,7 +230,7 @@ BOOL CMobisDlg::OnInitDialog()
 		m_cameraManage.allocationCameraConnect();
 
 
-
+	m_hAppExit = CreateEvent( NULL, FALSE, FALSE, NULL );
 
 	//初始化全局变量///////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < g_CamNum; i++)
@@ -230,24 +238,28 @@ BOOL CMobisDlg::OnInitDialog()
 		InitializeCriticalSection(&g_CamBufs[i]); 
 		g_CamAcqs[i] = CreateEvent( NULL, FALSE, FALSE, NULL );
 	}
-	//初始化全局变量 ---按下check按钮，得到最新图像所需同步的变量///////////////////////////////////////
+	//初始化全局变量 ---按下check按钮，得到最新图像所需同步的变量////////////////////////////////////////
 	for (int i = 0; i < g_CamNum; i++)
 	{
 		g_ReadyChecks[i] = CreateEvent( NULL, TRUE, FALSE, NULL );
 	}
 
-	//初始化采集线程////////////////////////////////////////////////////////////////////////////////////
+	//初始化采集线程///////////////////////////////////////////////////////////////////////////////////
+	m_hAcqThreads.resize(g_CamNum);
 	point_and_camIDs.resize(g_CamNum);
 	for (int i = 0; i < g_CamNum; i++)
 	{
 		point_and_camIDs[i].camID=i;
 		point_and_camIDs[i].Point=this;
-		m_hAcqThread = (HANDLE)_beginthreadex(NULL,0,AcqAndShowThread,&point_and_camIDs[i],0,NULL);
+		m_hAcqThreads[i] = (HANDLE)_beginthreadex(NULL,0,AcqAndShowThread,&point_and_camIDs[i],0,NULL);
 	}
 	//初始化检测线程////////////////////////////////////////////////////////////////////////////////////
 	m_hCheckEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
 	m_hCheckThread = (HANDLE)_beginthreadex(NULL,0,CheckThread,this,0,NULL);
 	//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 	return TRUE; 
 }
 
@@ -385,238 +397,7 @@ void CMobisDlg::OnBnClickedBegincheck()
 	return ;
 }
 
-unsigned CMobisDlg:: CheckThread(void*params)
-{
-	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
 
-	while (WaitForSingleObject(pCMobisDlg->m_hCheckEvent,INFINITE)==WAIT_OBJECT_0)
-	{
-		//获取图像///////////////////////////////////////////////////////////////////////////////
-		vector<Mat>images; 
-		pCMobisDlg->getImages(images);
-		//int num = pCMobisDlg->m_cameraManage.m_cameraList.size();
-		//if (num>0 )  //有相机
-		//{
-		//	if(pCMobisDlg->m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
-		//	{
-		//		for (int i = 0; i < num; i++)
-		//		{
-		//			pCMobisDlg->m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
-		//			ResetEvent(g_ReadyChecks[i]);     //同步
-		//		}
-		//	}
-		//	else
-		//	{
-		//		for (int i = 0; i < num; i++)
-		//		{
-		//			ResetEvent(g_ReadyChecks[i]);     //同步
-		//		}
-		//	}
-
-
-		//	for (int i = 0; i < num; i++)
-		//	{
-		//		if(WaitForSingleObject(g_ReadyChecks[i],INFINITE)==WAIT_OBJECT_0)
-		//		{
-		//			images.push_back(pCMobisDlg->workPool_imgs[i].clone());
-
-		//		}
-		//	}
-		//}
-		//else if(num==0)//无相机，检测指定图片
-		//{
-		//	for (int i = 0; i <pCMobisDlg->workPool_imgs.size(); i++)
-		//	{
-		//		images.push_back(pCMobisDlg->workPool_imgs[i].clone());
-		//	}
-		//}
-
-
-
-
-
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////
-		//擦除检测区域图像
-		for (int i = 0; i < 20; i++)
-		{
-			CDC *pdc = pCMobisDlg->m_pics[i].GetDC();
-			pdc->SetStretchBltMode(STRETCH_HALFTONE);
-			CRect myrect;
-			pCMobisDlg->m_pics[i].GetClientRect(&myrect);
-			HDC hDC=pdc->GetSafeHdc();	
-
-			Mat roi = pCMobisDlg->m_no;
-			//IplImage *img = &roi.operator IplImage();
-			//IplImage tem = (IplImage)roi;
-			IplImage *img = &(IplImage)roi;
-			CvvImage iimg;			//创建一个CvvImage对象
-			iimg.CopyOf(img);
-			iimg.DrawToHDC(hDC,&myrect);
-			pCMobisDlg->m_pics[i].ReleaseDC( pdc );
-		}
-
-		//显示检测区域图像
-		int modelNum = pCMobisDlg->CurrentXinghao.m_Models.size();
-		for (int i = 0; i < modelNum; i++)
-		{
-			//检测是否有图像存在////////////////////////////////
-			Model c_model =pCMobisDlg->CurrentXinghao.m_Models[i];
-			Mat image; 
-			if(c_model.m_cameraID>pCMobisDlg->workPool_imgs.size())  //防止型号所需的CamId，在软件中不存在。防止下面数组越界
-				continue;
-			if(!pCMobisDlg->workPool_imgs[c_model.m_cameraID].empty()) //如果没有图像就不处理
-				image = pCMobisDlg->workPool_imgs[c_model.m_cameraID];
-			else 
-				continue;
-			//if(c_model.m_cameraID==0)
-			//{
-			//	if(!pCMobisDlg->workPool_img.empty())
-			//		image = pCMobisDlg->workPool_img;
-			//	else 
-			//		continue;
-			//}
-			//else if(c_model.m_cameraID==1)
-			//{
-			//	if(!pCMobisDlg->workPool_img2.empty())
-			//		image = pCMobisDlg->workPool_img2;
-			//	else 
-			//		continue;
-			//}
-
-
-
-			///////////////////////////////////////////////////
-
-			CDC *pdc = pCMobisDlg->m_pics[i].GetDC();
-			pdc->SetStretchBltMode(STRETCH_HALFTONE);
-			CRect myrect;
-			pCMobisDlg->m_pics[i].GetClientRect(&myrect);
-			HDC hDC=pdc->GetSafeHdc();	
-
-
-			Mat roi(image,pCMobisDlg->CurrentXinghao.m_Models[i].Search_rect);
-			IplImage *img = &(IplImage)roi;
-
-			CvvImage iimg;			//创建一个CvvImage对象
-			iimg.CopyOf(img);
-			iimg.DrawToHDC(hDC,&myrect);
-			pCMobisDlg->m_pics[i].ReleaseDC( pdc );
-		}
-
-
-
-
-		////擦除显示结果
-		for (int i = 0; i < 20; i++)
-		{
-			CDC *pdc = pCMobisDlg->m_status[i].GetDC();
-			pdc->SetStretchBltMode(STRETCH_HALFTONE);
-			CRect myrect;
-			pCMobisDlg->m_status[i].GetClientRect(&myrect);
-			HDC hDC=pdc->GetSafeHdc();	
-
-			Mat roi = pCMobisDlg->m_no;
-			IplImage *img = &(IplImage)roi;
-
-			CvvImage iimg;			//创建一个CvvImage对象
-			iimg.CopyOf(img);
-			iimg.DrawToHDC(hDC,&myrect);
-			pCMobisDlg->m_pics[i].ReleaseDC( pdc );
-		}
-
-		myAlgorithm_ncc cat(&pCMobisDlg->CurrentXinghao);
-		if(!cat.templateMatching(images))
-			AfxMessageBox("检测失败，检查模板是否建立完好");
-		else
-		{
-			vector<int> result = cat.getValueResult();
-			//输出检测结果
-			for (int i = 0; i < result.size(); i++)
-			{
-				CDC *pdc = pCMobisDlg->m_status[i].GetDC();
-				pdc->SetStretchBltMode(STRETCH_HALFTONE);
-				CRect myrect;
-				pCMobisDlg->m_status[i].GetClientRect(&myrect);
-				HDC hDC=pdc->GetSafeHdc();	
-
-				IplImage *img;
-				if(result[i]==1)
-				{
-					Mat roi = pCMobisDlg->m_pass;
-					img = &(IplImage)roi;
-				}
-				else
-				{
-					Mat roi = pCMobisDlg->m_ng;
-					img = &(IplImage)roi;
-				}
-
-
-				CvvImage iimg;			//创建一个CvvImage对象
-				iimg.CopyOf(img);
-				iimg.DrawToHDC(hDC,&myrect);
-				pCMobisDlg->m_pics[i].ReleaseDC( pdc );
-			}
-
-			//更新图像主窗口		
-			for (int i = 0; i < pCMobisDlg->m_zoomPics.size(); i++)
-			{
-				pCMobisDlg->m_zoomPics[i].states = result;
-				pCMobisDlg->m_zoomPics[i].Invalidate();
-			}
-			//pCMobisDlg->m_zoomPic.states = result;
-			//pCMobisDlg->m_zoomPic.Invalidate();
-			//pCMobisDlg->m_zoomPic2.states = result;
-			//pCMobisDlg->m_zoomPic2.Invalidate();
-		}
-
-		//保存图像数据
-		pCMobisDlg->savePic(images);
-
-
-		vector<myAlgorithm_ncc::myresult> result = cat.getAllResult();
-
-		//CString messages("正负模板相似度，与前面图的距离偏差 \n");
-		//for (int i = 0; i < result.size(); i++)
-		//{
-		//	//Point offshit;
-		//	//if(pCMobisDlg->m_result.size()>0)
-		//	//{
-		//	//	Point prePt = pCMobisDlg->m_result[i].result?pCMobisDlg->m_result[i].p_max_pt:pCMobisDlg->m_result[i].n_max_pt;
-		//	//	Point afterPt = result[i].result?result[i].p_max_pt:result[i].n_max_pt;
-		//	//	offshit =  afterPt-prePt;
-		//	//}
-		//	CString m;
-		//	/*m.Format("%d: %.3f,%.3f   match_value=%.3f   x=%d,y=%d \n",i+1,result[i].p_max,result[i].n_max,result[i].directValue,offshit.x,offshit.y);*/
-		//	m.Format("%d: %.3f,%.3f  match_value=%.3f \n",i+1,result[i].p_max,result[i].n_max,result[i].directValue);
-		//	messages+=m;
-		//}
-		//::MessageBox(pCMobisDlg->m_hWnd,messages,"详细结果",0);
-
-		//ofstream fout;
-		//fout.open("output.txt",ios_base::app);
-		//fout << messages << "\n";
-		//fout.close();
-
-		/*CString messages2;
-		if(pCMobisDlg->m_result.size()>0)
-		{
-		for (int i = 0; i < result.size(); i++)
-		{
-
-		CString str;
-		str.Format("%d: x=%d,y=%d \n",i+1,offshit.x,offshit.y);
-		messages2+=str;
-		}
-		::MessageBox(pCMobisDlg->m_hWnd,messages2,"距离偏差",0);
-		}*/
-		pCMobisDlg->m_result = result;
-	}
-
-	return true;
-}
 
 unsigned CMobisDlg:: FindCameraThread(void*params)
 {
@@ -658,6 +439,199 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 			}
 		}
 	}
+
+	return true;
+}
+
+unsigned CMobisDlg:: CheckThread(void*params)
+{
+	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
+
+	while(1)
+	{
+		if(WaitForSingleObject(pCMobisDlg->m_hCheckEvent,INFINITE)==WAIT_OBJECT_0)
+		{
+			//获取图像///////////////////////////////////////////////////////////////////////////////
+			vector<Mat>images; 
+			pCMobisDlg->getImages(images);
+			/////////////////////////////////////////////////////////////////////////////////////////
+
+			//擦除检测区域图像
+			for (int i = 0; i < 20; i++)
+			{
+				CDC *pdc = pCMobisDlg->m_pics[i].GetDC();
+				pdc->SetStretchBltMode(STRETCH_HALFTONE);
+				CRect myrect;
+				pCMobisDlg->m_pics[i].GetClientRect(&myrect);
+				HDC hDC=pdc->GetSafeHdc();	
+
+				Mat roi = pCMobisDlg->m_no;
+				IplImage *img = &(IplImage)roi;
+				CvvImage iimg;			//创建一个CvvImage对象
+				iimg.CopyOf(img);
+				iimg.DrawToHDC(hDC,&myrect);
+				pCMobisDlg->m_pics[i].ReleaseDC( pdc );
+			}
+
+			//显示检测区域图像
+			int modelNum = pCMobisDlg->CurrentXinghao.m_Models.size();
+			for (int i = 0; i < modelNum; i++)
+			{
+				//检测是否有图像存在////////////////////////////////
+				Model c_model =pCMobisDlg->CurrentXinghao.m_Models[i];
+				Mat image; 
+				if(c_model.m_cameraID>pCMobisDlg->workPool_imgs.size())  //防止型号所需的CamId，在软件中不存在。防止下面数组越界
+					continue;
+				if(!pCMobisDlg->workPool_imgs[c_model.m_cameraID].empty()) //如果没有图像就不处理
+					image = pCMobisDlg->workPool_imgs[c_model.m_cameraID];
+				else 
+					continue;
+				//if(c_model.m_cameraID==0)
+				//{
+				//	if(!pCMobisDlg->workPool_img.empty())
+				//		image = pCMobisDlg->workPool_img;
+				//	else 
+				//		continue;
+				//}
+				//else if(c_model.m_cameraID==1)
+				//{
+				//	if(!pCMobisDlg->workPool_img2.empty())
+				//		image = pCMobisDlg->workPool_img2;
+				//	else 
+				//		continue;
+				//}
+
+
+
+				///////////////////////////////////////////////////
+
+				CDC *pdc = pCMobisDlg->m_pics[i].GetDC();
+				pdc->SetStretchBltMode(STRETCH_HALFTONE);
+				CRect myrect;
+				pCMobisDlg->m_pics[i].GetClientRect(&myrect);
+				HDC hDC=pdc->GetSafeHdc();	
+
+
+				Mat roi(image,pCMobisDlg->CurrentXinghao.m_Models[i].Search_rect);
+				IplImage *img = &(IplImage)roi;
+
+				CvvImage iimg;			//创建一个CvvImage对象
+				iimg.CopyOf(img);
+				iimg.DrawToHDC(hDC,&myrect);
+				pCMobisDlg->m_pics[i].ReleaseDC( pdc );
+			}
+
+
+
+
+			////擦除显示结果
+			for (int i = 0; i < 20; i++)
+			{
+				CDC *pdc = pCMobisDlg->m_status[i].GetDC();
+				pdc->SetStretchBltMode(STRETCH_HALFTONE);
+				CRect myrect;
+				pCMobisDlg->m_status[i].GetClientRect(&myrect);
+				HDC hDC=pdc->GetSafeHdc();	
+
+				Mat roi = pCMobisDlg->m_no;
+				IplImage *img = &(IplImage)roi;
+
+				CvvImage iimg;			//创建一个CvvImage对象
+				iimg.CopyOf(img);
+				iimg.DrawToHDC(hDC,&myrect);
+				pCMobisDlg->m_pics[i].ReleaseDC( pdc );
+			}
+
+			myAlgorithm_ncc cat(&pCMobisDlg->CurrentXinghao);
+			if(!cat.templateMatching(images))
+				AfxMessageBox("检测失败，检查模板是否建立完好");
+			else
+			{
+				vector<int> result = cat.getValueResult();
+				//输出检测结果
+				for (int i = 0; i < result.size(); i++)
+				{
+					CDC *pdc = pCMobisDlg->m_status[i].GetDC();
+					pdc->SetStretchBltMode(STRETCH_HALFTONE);
+					CRect myrect;
+					pCMobisDlg->m_status[i].GetClientRect(&myrect);
+					HDC hDC=pdc->GetSafeHdc();	
+
+					IplImage *img;
+					if(result[i]==1)
+					{
+						Mat roi = pCMobisDlg->m_pass;
+						img = &(IplImage)roi;
+					}
+					else
+					{
+						Mat roi = pCMobisDlg->m_ng;
+						img = &(IplImage)roi;
+					}
+
+
+					CvvImage iimg;			//创建一个CvvImage对象
+					iimg.CopyOf(img);
+					iimg.DrawToHDC(hDC,&myrect);
+					pCMobisDlg->m_pics[i].ReleaseDC( pdc );
+				}
+
+				//更新图像主窗口		
+				for (int i = 0; i < pCMobisDlg->m_zoomPics.size(); i++)
+				{
+					pCMobisDlg->m_zoomPics[i].states = result;
+					pCMobisDlg->m_zoomPics[i].Invalidate();
+				}
+				//pCMobisDlg->m_zoomPic.states = result;
+				//pCMobisDlg->m_zoomPic.Invalidate();
+				//pCMobisDlg->m_zoomPic2.states = result;
+				//pCMobisDlg->m_zoomPic2.Invalidate();
+			}
+
+			//保存图像数据
+			pCMobisDlg->savePic(images);
+
+
+			vector<myAlgorithm_ncc::myresult> result = cat.getAllResult();
+
+			//CString messages("正负模板相似度，与前面图的距离偏差 \n");
+			//for (int i = 0; i < result.size(); i++)
+			//{
+			//	//Point offshit;
+			//	//if(pCMobisDlg->m_result.size()>0)
+			//	//{
+			//	//	Point prePt = pCMobisDlg->m_result[i].result?pCMobisDlg->m_result[i].p_max_pt:pCMobisDlg->m_result[i].n_max_pt;
+			//	//	Point afterPt = result[i].result?result[i].p_max_pt:result[i].n_max_pt;
+			//	//	offshit =  afterPt-prePt;
+			//	//}
+			//	CString m;
+			//	/*m.Format("%d: %.3f,%.3f   match_value=%.3f   x=%d,y=%d \n",i+1,result[i].p_max,result[i].n_max,result[i].directValue,offshit.x,offshit.y);*/
+			//	m.Format("%d: %.3f,%.3f  match_value=%.3f \n",i+1,result[i].p_max,result[i].n_max,result[i].directValue);
+			//	messages+=m;
+			//}
+			//::MessageBox(pCMobisDlg->m_hWnd,messages,"详细结果",0);
+
+			//ofstream fout;
+			//fout.open("output.txt",ios_base::app);
+			//fout << messages << "\n";
+			//fout.close();
+
+			/*CString messages2;
+			if(pCMobisDlg->m_result.size()>0)
+			{
+			for (int i = 0; i < result.size(); i++)
+			{
+
+			CString str;
+			str.Format("%d: x=%d,y=%d \n",i+1,offshit.x,offshit.y);
+			messages2+=str;
+			}
+			::MessageBox(pCMobisDlg->m_hWnd,messages2,"距离偏差",0);
+			}*/
+			pCMobisDlg->m_result = result;
+		}
+	}
+
 
 	return true;
 }
@@ -1054,16 +1028,31 @@ void CMobisDlg::OnBnClickedButton2()
 
 
 
-int CMobisDlg::timeOutNum = 0;
-void CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
+
+int CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 {
+	if (!images.empty())
+	{
+		images.clear();
+	}
+
+
 	int num = m_cameraManage.m_cameraList.size();
-	if (num>0 )  //有相机
+
+	if(num==0)//无相机，检测指定图片
+	{
+		for (int i = 0; i <workPool_imgs.size(); i++)
+		{
+			images.push_back(workPool_imgs[i].clone());
+		}
+		return TRUE;
+	}
+	else if (num>0 )  //有相机
 	{
 		for (int i = 0; i < tryNum; i++) //尝试tryNUm次
 		{
 
-			if(m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig)
+			if(m_cameraManage.m_cameraList[0].m_TrigSetting==SoftWareTrig) // 软件触发
 			{
 				for (int i = 0; i < num; i++)
 				{
@@ -1071,7 +1060,7 @@ void CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 					ResetEvent(g_ReadyChecks[i]);     //同步
 				}
 			}
-			else
+			else// 连续触发
 			{
 				for (int i = 0; i < num; i++)
 				{
@@ -1090,25 +1079,17 @@ void CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 					images.push_back(workPool_imgs[i].clone());
 				}
 
-				break;
+				return TRUE;	//取得图像返回
 
 			}
 			else if (ret==WAIT_TIMEOUT)
 			{
 				//继续try
 
-				timeOutNum++;
+
 			}
 		}
-
-
-	}
-	else if(num==0)//无相机，检测指定图片
-	{
-		for (int i = 0; i <workPool_imgs.size(); i++)
-		{
-			images.push_back(workPool_imgs[i].clone());
-		}
+		return FALSE;  //没取得图像
 	}
 
 }
