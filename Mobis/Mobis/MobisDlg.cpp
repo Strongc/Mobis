@@ -60,9 +60,18 @@ CMobisDlg::CMobisDlg(CWnd* pParent /*=NULL*/): CDialogEx(CMobisDlg::IDD, pParent
 
 CMobisDlg::~CMobisDlg()
 {
+	SetEvent(m_hAppExit);
 
+	int timeout=10000;//等待10秒
+	DWORD  ret2= WaitForSingleObject(m_hCheckThread,timeout);
+	DWORD  ret1 = WaitForMultipleObjects(m_hAcqThreads.size(),&m_hAcqThreads[0],true,timeout);
+	
 
-
+	if(ret1==WAIT_TIMEOUT||ret2==WAIT_TIMEOUT)
+	{
+		int a=9;
+		//强制关闭程序
+	}
 
 }
 void CMobisDlg::DoDataExchange(CDataExchange* pDX)
@@ -221,7 +230,6 @@ BOOL CMobisDlg::OnInitDialog()
 	myUpdata(false);
 
 	//初始化相机///////////////////////////////////
-	//m_cameraManage.findCamera();
 	if(m_cameraManage.m_cameraIDList.size()<1)
 	{
 		m_hFindCamThread = (HANDLE)_beginthreadex(NULL,0,FindCameraThread,this,0,NULL);
@@ -230,7 +238,7 @@ BOOL CMobisDlg::OnInitDialog()
 		m_cameraManage.allocationCameraConnect();
 
 
-	m_hAppExit = CreateEvent( NULL, FALSE, FALSE, NULL );
+	m_hAppExit = CreateEventA( NULL, TRUE, FALSE, NULL );
 
 	//初始化全局变量///////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < g_CamNum; i++)
@@ -418,9 +426,9 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 	point_and_camID* p = (point_and_camID*)params;
 	CMobisDlg* pCMobisDlg = (CMobisDlg*)(p->Point);
 	int camID = p->camID;
-	while(1)
+	while(WaitForSingleObject(pCMobisDlg->m_hAppExit,0)==WAIT_TIMEOUT)
 	{
-		if(WaitForSingleObject(g_CamAcqs[camID],INFINITE)==WAIT_OBJECT_0)
+		if(WaitForSingleObject(g_CamAcqs[camID],10)==WAIT_OBJECT_0)
 		{
 			if(!pCMobisDlg->m_cameraManage.m_cameraList.empty())
 			{
@@ -447,9 +455,9 @@ unsigned CMobisDlg:: CheckThread(void*params)
 {
 	CMobisDlg* pCMobisDlg = (CMobisDlg*)params;
 
-	while(1)
+	while(WaitForSingleObject(pCMobisDlg->m_hAppExit,0)==WAIT_TIMEOUT)
 	{
-		if(WaitForSingleObject(pCMobisDlg->m_hCheckEvent,INFINITE)==WAIT_OBJECT_0)
+		if(WaitForSingleObject(pCMobisDlg->m_hCheckEvent,10)==WAIT_OBJECT_0)
 		{
 			//获取图像///////////////////////////////////////////////////////////////////////////////
 			vector<Mat>images; 
@@ -1056,8 +1064,9 @@ int CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 			{
 				for (int i = 0; i < num; i++)
 				{
-					m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
 					ResetEvent(g_ReadyChecks[i]);     //同步
+					m_cameraManage.m_cameraList[i].OnBnClickedSwtriggerbutton();
+					
 				}
 			}
 			else// 连续触发
@@ -1091,6 +1100,6 @@ int CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 		}
 		return FALSE;  //没取得图像
 	}
-
+	return FALSE;
 }
 

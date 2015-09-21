@@ -35,9 +35,6 @@ void sheet_LightSetPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CheckBtn, m_openComm_check);
 }
 
-
-
-
 int sheet_LightSetPage::getData(CMobisDlg*pMaindata)
 {
 
