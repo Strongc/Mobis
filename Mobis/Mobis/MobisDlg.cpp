@@ -60,18 +60,7 @@ CMobisDlg::CMobisDlg(CWnd* pParent /*=NULL*/): CDialogEx(CMobisDlg::IDD, pParent
 
 CMobisDlg::~CMobisDlg()
 {
-	SetEvent(m_hAppExit);
-
-	int timeout=10000;//等待10秒
-	DWORD  ret2= WaitForSingleObject(m_hCheckThread,timeout);
-	DWORD  ret1 = WaitForMultipleObjects(m_hAcqThreads.size(),&m_hAcqThreads[0],true,timeout);
 	
-
-	if(ret1==WAIT_TIMEOUT||ret2==WAIT_TIMEOUT)
-	{
-		int a=9;
-		//强制关闭程序
-	}
 
 }
 void CMobisDlg::DoDataExchange(CDataExchange* pDX)
@@ -150,6 +139,7 @@ BEGIN_MESSAGE_MAP(CMobisDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_Algorithm_SETTING, &CMobisDlg::OnBnClickedAlgorithmSetting)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 // CMobisDlg message handlers
@@ -438,12 +428,12 @@ unsigned CMobisDlg:: AcqAndShowThread(void*params)
 				LeaveCriticalSection(&g_CamBufs[camID]); 
 				SetEvent(g_ReadyChecks[camID]);			//通知检测函数，图像已经准备好
 
-
+				
 				if(rgb_img.channels()==1)
 					cvtColor(rgb_img,rgb_img,CV_GRAY2RGB);
 				pCMobisDlg->m_zoomPics[camID].UpdateImage(rgb_img);
-
 				Sleep(100);  //控制显示速度，太快UI线程会卡
+				
 			}
 		}
 	}
@@ -1103,3 +1093,22 @@ int CMobisDlg::getImages(vector<Mat> &images,DWORD timeOut,int tryNum )
 	return FALSE;
 }
 
+
+
+void CMobisDlg::OnClose()
+{
+	SetEvent(m_hAppExit);
+
+	int timeout=10000;//等待10秒
+	DWORD  ret2= WaitForSingleObject(m_hCheckThread,timeout);
+	DWORD  ret1 = WaitForMultipleObjects(m_hAcqThreads.size(),&m_hAcqThreads[0],true,timeout);
+	
+
+	if(ret1==WAIT_TIMEOUT||ret2==WAIT_TIMEOUT)
+	{
+		int a=9;
+		//强制关闭程序
+	}
+
+	CDialogEx::OnClose();
+}

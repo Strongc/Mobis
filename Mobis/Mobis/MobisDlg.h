@@ -17,7 +17,7 @@ class CMobisDlg : public CDialogEx
 	// Construction
 public:
 	CMobisDlg(CWnd* pParent = NULL);	// standard constructor
-	~CMobisDlg();
+	virtual ~CMobisDlg();
 	// Dialog Data
 	enum { IDD = IDD_MOBIS_DIALOG };
 
@@ -123,4 +123,5 @@ public:
 
 	int getImages(vector<Mat> &images,DWORD timeOut=2000,int tryNum=3);
 
+	afx_msg void OnClose();
 };
