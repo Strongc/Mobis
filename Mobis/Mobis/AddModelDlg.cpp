@@ -10,7 +10,7 @@ bool keepRectSafty(Rect rect,Size imgsize);
 
 IMPLEMENT_DYNAMIC(addModel2, CDialogEx)
 
-addModel2::addModel2(CWnd* pParent /*=NULL*/)
+	addModel2::addModel2(CWnd* pParent /*=NULL*/)
 	: CDialogEx(addModel2::IDD, pParent)
 	, m_slider_value(_T(""))
 	, m_checkID(0)
@@ -96,7 +96,7 @@ BOOL addModel2::OnInitDialog()
 	}
 
 	//跟新检测目标
-	m_checkID = p_Model->m_cameraID;
+	m_checkID = p_Model->getCameraID();
 	UpdateData(FALSE);
 
 	//选择数据源
@@ -128,13 +128,13 @@ BOOL addModel2::OnInitDialog()
 
 
 	m_slider.SetRange(1,50);
-	if(!p_Model->m_pModels.empty())
+	if(!p_Model->getPModel_v().empty())
 	{
 		Rect rect = p_Model->getPModelRects(0);
 		Rect SearchRect = p_Model->getPModelSearchRects(0);
 		m_slider.SetPos(SearchRect.width-rect.width);
 	}
-	else if(!p_Model->m_nModels.empty())
+	else if(!p_Model->getNModel_v().empty())
 	{
 		Rect rect = p_Model->getNModelRects(0);
 		Rect SearchRect = p_Model->getNModelSearchRects(0);
@@ -291,11 +291,11 @@ LRESULT addModel2::OnMessage_ZoomPicture_add(WPARAM wParam, LPARAM lParam)
 	cv::Mat img_roi(m_zoomCtrl.m_img,rect);
 
 	Mat pm,nm;
-	if(p_Model->m_pModels.size()>0)
+	if(p_Model->getPModel_v().size()>0)
 	{
 		pm = p_Model->getPModel(0);
 	}
-	if(p_Model->m_nModels.size()>0)
+	if(p_Model->getNModel_v().size()>0)
 	{
 		nm = p_Model->getNModel(0);
 	}
@@ -303,11 +303,11 @@ LRESULT addModel2::OnMessage_ZoomPicture_add(WPARAM wParam, LPARAM lParam)
 
 	Mat pm2,nm2;
 
-	if(p_Model->m_pModels.size()>0)
+	if(p_Model->getPModel_v().size()>0)
 	{
 		pm2 = p_Model->getPModel(0);
 	}
-	if(p_Model->m_nModels.size()>0)
+	if(p_Model->getNModel_v().size()>0)
 	{
 		nm2 = p_Model->getNModel(0);
 	}
@@ -349,7 +349,7 @@ void addModel2::UpdateControl()
 		m_fuSearchRect[i] ="";
 	}
 
-	for (int i = 0; i < p_Model->m_pModels.size(); i++)
+	for (int i = 0; i < p_Model->getPModel_v().size(); i++)
 	{
 		m_zhengPic[i].loadImage(p_Model->getPModel(i));
 
@@ -364,7 +364,7 @@ void addModel2::UpdateControl()
 		m_zhengSearchRect[i] =str2;
 	}
 
-	for (int i = 0; i < p_Model->m_nModels.size(); i++)
+	for (int i = 0; i < p_Model->getNModel_v().size(); i++)
 	{
 		m_fuPic[i].loadImage(p_Model->getNModel(i));
 
@@ -398,10 +398,10 @@ void addModel2::UpdateControl()
 	}
 
 
-	if(p_Model->Search_rect.area()!=0&&!work_img.empty()&&
-		keepRectSafty(p_Model->Search_rect,Size(work_img.cols,work_img.rows)))
+	if(p_Model->getSearchrect().area()!=0&&!work_img.empty()&&
+		keepRectSafty(p_Model->getSearchrect(),Size(work_img.cols,work_img.rows)))
 	{
-		Mat showSearchregion(work_img,p_Model->Search_rect);
+		Mat showSearchregion(work_img,p_Model->getSearchrect());
 		m_Search_Rect.loadImage(showSearchregion);
 	}
 	else
@@ -414,7 +414,7 @@ void addModel2::UpdateControl()
 	{
 
 
-		if(p_Model->m_pModels_SearchRects.size()>0&&!work_img.empty()
+		if(p_Model->getPModelSearchRects_v().size()>0&&!work_img.empty()
 			&&keepRectSafty(p_Model->getDModelSearchRect(),Size(work_img.cols,work_img.rows)))
 		{
 			Point shifft = calDirect();
@@ -430,7 +430,7 @@ void addModel2::UpdateControl()
 
 	if(!p_Model->getDModel2().empty())
 	{
-		if(p_Model->m_nModels_SearchRects.size()>0&&!work_img.empty()
+		if(p_Model->getNModelSearchRects_v().size()>0&&!work_img.empty()
 			&&keepRectSafty(p_Model->getDModelSearchRect2(),Size(work_img.cols,work_img.rows)))
 		{
 			Point shifft = calDirect2();
@@ -519,7 +519,7 @@ void addModel2::protect_addModel(Model * model, int PIC_ID,Mat img,Rect rect)
 	}
 	else if(PIC_ID==1)
 	{
-		model->Search_rect = rect;
+		model->setSearchrect(rect);
 	}
 
 
@@ -560,8 +560,8 @@ bool addModel2::add_DModel_fromModel(Model * model, Mat img,Rect rect)
 
 	Mat DModel(img,DModel_rect);
 	model->setDModel(DModel.clone());
-	if(model->Search_rect.area()==0)
-		model->Search_rect = DModel_rect;
+	if(model->getSearchrect().area()==0)
+		model->setSearchrect(DModel_rect);
 	return true;
 }
 bool addModel2::add_DModel2(Model * model, Mat img,Rect rect)
@@ -600,8 +600,8 @@ bool addModel2::add_DModel_fromModel2(Model * model, Mat img,Rect rect)
 	Mat DModel(img,DModel_rect);
 	model->setDModel2(DModel.clone());
 
-	if(model->Search_rect.area()==0)
-		model->Search_rect = DModel_rect;
+	if(model->getSearchrect().area()==0)
+		model->getSearchrect() = DModel_rect;
 	return true;
 }
 
@@ -616,17 +616,23 @@ void addModel2::add_PModel(Model * model,int PIC_ID, Mat img,Rect rect)
 
 	int ID = PIC_ID-1000;
 	Mat roi(img,rect); 
-	if((model->m_pModels).size()>=ID)
+	if((model->getPModel_v()).size()>=ID)
 	{
-		model->m_pModels[ID-1] = roi.clone();
-		model->m_pModels_Rects[ID-1] = rect-shifft;
-		model->m_pModels_SearchRects[ID-1] = amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos());
+		model->setPModel(ID-1,roi.clone());
+		model->setPModelRects(ID-1,rect-shifft);
+		model->setPModelSearchRects(ID-1,amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		//model->m_pModels[ID-1] = roi.clone();
+		//model->m_pModels_Rects[ID-1] = rect-shifft;
+		//model->m_pModels_SearchRects[ID-1] = amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos());
 	}
 	else
 	{
-		model->m_pModels.push_back(roi.clone());
-		model->m_pModels_Rects.push_back(rect-shifft);
-		model->m_pModels_SearchRects.push_back(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		model->addPModel(roi.clone());
+		model->addPModelRects(rect-shifft);
+		model->addPModelSearchRects(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		//model->m_pModels.push_back(roi.clone());
+		//model->m_pModels_Rects.push_back(rect-shifft);
+		//model->m_pModels_SearchRects.push_back(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
 
 	}
 
@@ -642,17 +648,23 @@ void addModel2::add_NModel(Model * model,int PIC_ID, Mat img,Rect rect)
 
 	int ID = PIC_ID-2000;
 	Mat roi(img,rect); 
-	if((model->m_nModels).size()>= ID)
+	if((model->getNModel_v()).size()>= ID)
 	{
-		model->m_nModels[ID-1] = roi.clone();
-		model->m_nModels_Rects[ID-1] = rect-shifft;
-		model->m_nModels_SearchRects[ID-1] = amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos());
+		model->setNModel(ID-1,roi.clone());
+		model->setNModelRects(ID-1,rect-shifft);
+		model->setNModelSearchRects(ID-1,amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		//model->m_nModels[ID-1] = roi.clone();
+		//model->m_nModels_Rects[ID-1] = rect-shifft;
+		//model->m_nModels_SearchRects[ID-1] = amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos());
 	}
 	else
 	{
-		model->m_nModels.push_back(roi.clone());
-		model->m_nModels_Rects.push_back(rect-shifft);
-		model->m_nModels_SearchRects.push_back(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		model->addNModel(roi.clone());
+		model->addNModelRects(rect-shifft);
+		model->addNModelSearchRects(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
+		//model->m_nModels.push_back(roi.clone());
+		//model->m_nModels_Rects.push_back(rect-shifft);
+		//model->m_nModels_SearchRects.push_back(amplifyRrect(rect-shifft,0,m_slider.GetPos(),m_slider.GetPos()));
 	}
 }
 
@@ -666,12 +678,12 @@ void addModel2::protect_deleteModel(Model * model, int PIC_ID)
 
 
 
-	if(model->m_pModels.size()==0&&!p_Model->getDModel().empty())
+	if(model->getPModel_v().size()==0&&!p_Model->getDModel().empty())
 		delete_DModel_fromModel(model);
-	if(model->m_nModels.size()==0&&!p_Model->getDModel2().empty())
+	if(model->getNModel_v().size()==0&&!p_Model->getDModel2().empty())
 		delete_DModel_fromModel2(model);
-	if(model->m_pModels.size()==0&&model->m_nModels.size()==0)
-		model->Search_rect = Rect(0,0,0,0);
+	if(model->getPModel_v().size()==0&&model->getNModel_v().size()==0)
+		model->setSearchrect( Rect(0,0,0,0));
 
 }
 void addModel2::delete_DModel_fromModel(Model * model)
@@ -693,16 +705,11 @@ void addModel2::delete_DModel_fromModel2(Model * model)
 void addModel2::delete_PModel(Model * model,int PIC_ID)
 {
 	int ID = PIC_ID-1000;
-	if((model->m_pModels).size()>=ID)
+	if((model->getPModel_v()).size()>=ID)
 	{
-		vector<Mat>::iterator iter=p_Model->m_pModels.begin()+ID-1;
-		p_Model->m_pModels.erase(iter);
-
-		vector<Rect>::iterator it2=p_Model->m_pModels_Rects.begin()+ID-1;
-		p_Model->m_pModels_Rects.erase(it2);
-
-		vector<Rect>::iterator it=p_Model->m_pModels_SearchRects.begin()+ID-1;
-		p_Model->m_pModels_SearchRects.erase(it);
+		p_Model->minusPModel(ID-1);
+		p_Model->minusPModelRects(ID-1);
+		p_Model->minusPModelSearchRects(ID-1);
 	}
 	else
 	{
@@ -715,16 +722,11 @@ void addModel2::delete_NModel(Model * model,int PIC_ID)
 {
 	int ID = PIC_ID-2000;
 
-	if((model->m_nModels).size()>=ID)
+	if((model->getNModel_v()).size()>=ID)
 	{
-		vector<Mat>::iterator iter=p_Model->m_nModels.begin()+ID-1;
-		p_Model->m_nModels.erase(iter);
-
-		vector<Rect>::iterator it2=p_Model->m_nModels_Rects.begin()+ID-1;
-		p_Model->m_nModels_Rects.erase(it2);
-
-		vector<Rect>::iterator it=p_Model->m_nModels_SearchRects.begin()+ID-1;
-		p_Model->m_nModels_SearchRects.erase(it);
+		p_Model->minusNModel(ID-1);
+		p_Model->minusNModelRects(ID-1);
+		p_Model->minusNModelSearchRects(ID-1);
 	}
 	else
 	{
@@ -782,7 +784,7 @@ void addModel2::OnSelchangeCameraid()
 void addModel2::OnChangeEdit2()
 {
 	UpdateData(true);
-	p_Model->m_cameraID = m_checkID;
+	p_Model->setCameraID(m_checkID);
 }  
 void addModel2::OnClickedCheckLockcamera()
 {
@@ -808,17 +810,18 @@ void addModel2::OnCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 	m_slider_value=str;
 	UpdateData(false);
 
-	for (int i = 0; i < p_Model->m_pModels.size(); i++)
+	for (int i = 0; i < p_Model->getPModel_v().size(); i++)
 	{
 		Rect rect = p_Model->getPModelRects(i);
-		p_Model->m_pModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
-
+		Rect rectout = amplifyRrect(rect,0,nPos,nPos);
+		p_Model->setPModelSearchRects(i,rectout);
 	}
 
-	for (int i = 0; i < p_Model->m_nModels.size(); i++)
+	for (int i = 0; i < p_Model->getNModel_v().size(); i++)
 	{
 		Rect rect = p_Model->getNModelRects(i);
-		p_Model->m_nModels_SearchRects[i] = amplifyRrect(rect,0,nPos,nPos);
+		Rect rectout = amplifyRrect(rect,0,nPos,nPos);
+		p_Model->setNModelSearchRects(i,rectout);
 	}
 
 	UpdateControl();
@@ -878,8 +881,8 @@ Mat addModel2::getModelFromID(Model * model,int ID)
 	if(ID>1000&&ID<2000) //正模板
 	{
 		ID=ID-1000;
-		if((model->m_pModels).size()>=ID)
-			return model->m_pModels[ID];
+		if((model->getPModel_v()).size()>=ID)
+			return model->getPModel(ID);
 		else 
 			return Mat();
 	}
@@ -887,8 +890,8 @@ Mat addModel2::getModelFromID(Model * model,int ID)
 	else if(ID>2000&&ID<3000)//负模板
 	{
 		ID=ID-2000;
-		if((model->m_pModels).size()>=ID)
-			return model->m_nModels[ID];
+		if((model->getNModel_v()).size()>=ID)
+			return model->getNModel(ID);
 		else 
 			return Mat();
 	}
@@ -903,31 +906,30 @@ Rect addModel2::getModelRectFromID(Model * model,int ID)
 	if(ID>1000&&ID<2000) //正模板
 	{
 		ID=ID-1000;
-		if((model->m_pModels_Rects).size()>=ID)
-			return model->m_pModels_Rects[ID-1];
-		else if(model->m_pModels_Rects.size()>0)
-			return model->m_pModels_Rects[0];
-		else if(model->m_nModels_Rects.size()>0)
-			return model->m_nModels_Rects[0];
+		if(model->getPModelRects_v().size()>=ID)
+			return model->getPModelRects(ID-1);
+		else if(model->getPModelRects_v().size()>0)
+			return model->getPModelRects(0);
+		else if(model->getNModelRects_v().size()>0)
+			return model->getNModelRects(0);
 		else
 			return Rect(0,0,0,0);
 	}
-
 	else if(ID>2000&&ID<3000)//负模板
 	{
 		ID=ID-2000;
-		if((model->m_nModels_Rects).size()>=ID)
-			return model->m_nModels_Rects[ID-1];
-		else if(model->m_nModels_Rects.size()>0)
-			return model->m_nModels_Rects[0];
-		else if(model->m_pModels_Rects.size()>0)
-			return model->m_pModels_Rects[0];
+		if(model->getNModelRects_v().size()>=ID)
+			return model->getNModelRects(ID-1);
+		else if(model->getNModelRects_v().size()>0)
+			return model->getNModelRects(0);
+		else if(model->getPModelRects_v().size()>0)
+			return model->getPModelRects(0);
 		else
 			return Rect(0,0,0,0);
 	}
 	else if(ID==1)
 	{
-		return model->Search_rect;
+		return model->getSearchrect();
 	}
 	else if(ID==100)
 	{

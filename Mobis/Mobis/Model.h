@@ -1,6 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 #include <string>
+#include<list>
 #include"opencv.hpp"
 using namespace std;
 using namespace cv;
@@ -8,34 +9,26 @@ using namespace cv;
 class Model
 {
 public:
-	Model():m_Describe("defaut Model name"),m_cameraID(0){};
+	Model():m_Describe("defaut_Model_name"),m_cameraID(0),m_show_Search_rect(Rect(0,0,0,0)){};
 	~Model(){};
 
 	string getDescribe() const
 	{
 		return m_Describe;
 	};
-	void setDescribe(string des)
-	{
-		m_Describe =des;
-	};
-
-	int getCameraID() const
+	int  getCameraID() const
 	{
 		return m_cameraID;
 	};
-	void setCameraID(int ID)
+	Rect getSearchrect() const
 	{
-		m_cameraID =ID;
-	};
-
-
-
-	Mat getDModel() const
+		return m_show_Search_rect;
+	}
+	Mat  getDModel() const
 	{
 		return m_dModel;
 	}
-	Mat getDModelMask() const
+	Mat  getDModelMask() const
 	{
 		return m_dModel_Mask;
 	}
@@ -47,7 +40,34 @@ public:
 	{
 		return m_dModel_SearchRect;
 	}
-
+	Mat  getDModel2() const
+	{
+		return m_dModel2;
+	}
+	Mat  getDModelMask2() const
+	{
+		return m_dModel_Mask2;
+	}
+	Rect getDModelRect2() const
+	{
+		return m_dModel_rect2;
+	}
+	Rect getDModelSearchRect2() const
+	{
+		return m_dModel_SearchRect2;
+	}
+	void setDescribe(string des)
+	{
+		m_Describe =des;
+	};
+	void setCameraID(int ID)
+	{
+		m_cameraID =ID;
+	};
+	void setSearchrect(Rect rect)
+	{
+		m_show_Search_rect = rect;
+	}
 	void setDModel(Mat model)
 	{
 		m_dModel = model;
@@ -64,25 +84,6 @@ public:
 	{
 		m_dModel_SearchRect = rect;
 	}
-
-
-	Mat getDModel2() const
-	{
-		return m_dModel2;
-	}
-	Mat getDModelMask2() const
-	{
-		return m_dModel_Mask2;
-	}
-	Rect getDModelRect2() const
-	{
-		return m_dModel_rect2;
-	}
-	Rect getDModelSearchRect2() const
-	{
-		return m_dModel_SearchRect2;
-	}
-
 	void setDModel2(Mat model)
 	{
 		m_dModel2 = model;
@@ -103,9 +104,31 @@ public:
 
 
 
-	void addPModel(Mat img)
+
+
+	vector<Mat> getPModel_v()
 	{
-		m_pModels.push_back(img);
+		return m_pModels;
+	}
+	vector<Rect> getPModelRects_v()
+	{
+		return m_pModels_Rects;
+	}
+	vector<Rect> getPModelSearchRects_v()
+	{
+		return m_pModels_SearchRects;
+	}
+	vector<Mat> getNModel_v()
+	{
+		return m_nModels;
+	}
+	vector<Rect> getNModelRects_v()
+	{
+		return m_nModels_Rects;
+	}
+	vector<Rect> getNModelSearchRects_v()
+	{
+		return m_nModels_SearchRects;
 	}
 	Mat  getPModel(int index)
 	{
@@ -113,33 +136,11 @@ public:
 		vector<Mat>::iterator itor = m_pModels.begin()+index;
 		return *itor;
 	}
-	void minusPModel(int index)
-	{
-		assert(m_pModels.size()>index);
-		vector<Mat>::iterator itor = m_pModels.begin()+index;
-		m_pModels.erase(itor);
-	}
-
-	void addPModelRects(Rect rect)
-	{
-		m_pModels_Rects.push_back(rect);
-	}
 	Rect getPModelRects(int index)
 	{
 		assert(m_pModels_Rects.size()>index);
 		vector<Rect>::iterator itor = m_pModels_Rects.begin()+index;
 		return *itor;
-	}
-	void minusPModelRects(int index)
-	{
-		assert(m_pModels_Rects.size()>index);
-		vector<Rect>::iterator itor = m_pModels_Rects.begin()+index;
-		m_pModels_Rects.erase(itor);
-	}
-
-	void addPModelSearchRects(Rect rect)
-	{
-		m_pModels_SearchRects.push_back(rect);
 	}
 	Rect getPModelSearchRects(int index)
 	{
@@ -147,33 +148,11 @@ public:
 		vector<Rect>::iterator itor = m_pModels_SearchRects.begin()+index;
 		return *itor;
 	}
-	void minusPModelSearchRects(int index)
-	{
-		assert(m_pModels_SearchRects.size()>index);
-		vector<Rect>::iterator itor = m_pModels_SearchRects.begin()+index;
-		m_pModels_SearchRects.erase(itor);
-	}
-
-	void addNModel(Mat img)
-	{
-		m_nModels.push_back(img);
-	}
 	Mat  getNModel(int index)
 	{
 		assert(m_nModels.size()>index);
 		vector<Mat>::iterator itor = m_nModels.begin()+index;
 		return *itor;
-	}
-	void minusNModel(int index)
-	{
-		assert(m_nModels.size()>index);
-		vector<Mat>::iterator itor = m_nModels.begin()+index;
-		m_nModels.erase(itor);
-	}
-
-	void addNModelRects(Rect rect)
-	{
-		m_nModels_Rects.push_back(rect);
 	}
 	Rect getNModelRects(int index)
 	{
@@ -181,22 +160,105 @@ public:
 		vector<Rect>::iterator itor = m_nModels_Rects.begin()+index;
 		return *itor;
 	}
-	void minusNModelRects(int index)
-	{
-		assert(m_nModels_Rects.size()>index);
-		vector<Rect>::iterator itor = m_nModels_Rects.begin()+index;
-		m_nModels_Rects.erase(itor);
-	}
-
-	void addNModelSearchRects(Rect rect)
-	{
-		m_nModels_SearchRects.push_back(rect);
-	}
 	Rect getNModelSearchRects(int index)
 	{
 		assert(m_nModels_SearchRects.size()>index);
 		vector<Rect>::iterator itor = m_nModels_SearchRects.begin()+index;
 		return *itor;
+	}
+
+	void setPModel(int index,Mat pModel)
+	{
+		assert(m_pModels.size()>index);
+		vector<Mat>::iterator itor = m_pModels.begin()+index;
+		*itor = pModel;
+	}
+	void setPModelRects(int index,Rect PModelRect )
+	{
+		assert(m_pModels_Rects.size()>index);
+		vector<Rect>::iterator itor = m_pModels_Rects.begin()+index;
+		 *itor =PModelRect ;
+	}
+	void setPModelSearchRects(int index,Rect PModelSearchRect )
+	{
+		assert(m_pModels_SearchRects.size()>index);
+		vector<Rect>::iterator itor = m_pModels_SearchRects.begin()+index;
+		*itor =PModelSearchRect;
+	}
+	void setNModel(int index,Mat NModel)
+	{
+		assert(m_nModels.size()>index);
+		vector<Mat>::iterator itor = m_nModels.begin()+index;
+		*itor = NModel;
+	}
+	void setNModelRects(int index,Rect NModelRect)
+	{
+		assert(m_nModels_Rects.size()>index);
+		vector<Rect>::iterator itor = m_nModels_Rects.begin()+index;
+		*itor = NModelRect;
+	}
+	void setNModelSearchRects(int index,Rect NModelSearchRect)
+	{
+		assert(m_nModels_SearchRects.size()>index);
+		vector<Rect>::iterator itor = m_nModels_SearchRects.begin()+index;
+		*itor = NModelSearchRect;
+	}
+
+
+	void addPModel(Mat img)
+	{
+		m_pModels.push_back(img);
+	}
+	void addPModelRects(Rect rect)
+	{
+		m_pModels_Rects.push_back(rect);
+	}
+	void addPModelSearchRects(Rect rect)
+	{
+		m_pModels_SearchRects.push_back(rect);
+	}
+	void addNModel(Mat img)
+	{
+		m_nModels.push_back(img);
+	}
+	void addNModelRects(Rect rect)
+	{
+		m_nModels_Rects.push_back(rect);
+	}
+	void addNModelSearchRects(Rect rect)
+	{
+		m_nModels_SearchRects.push_back(rect);
+	}
+
+	void minusPModel(int index)
+	{
+		assert(m_pModels.size()>index);
+		vector<Mat>::iterator itor = m_pModels.begin()+index;
+		m_pModels.erase(itor);
+	}
+	void minusPModelRects(int index)
+	{
+		assert(m_pModels_Rects.size()>index);
+		vector<Rect>::iterator itor = m_pModels_Rects.begin()+index;
+		m_pModels_Rects.erase(itor);
+	}
+	void minusPModelSearchRects(int index)
+	{
+		assert(m_pModels_SearchRects.size()>index);
+		vector<Rect>::iterator itor = m_pModels_SearchRects.begin()+index;
+		m_pModels_SearchRects.erase(itor);
+	}
+	void minusNModel(int index)
+	{
+		assert(m_nModels.size()>index);
+		vector<Mat>::iterator itor = m_nModels.begin()+index;
+		m_nModels.erase(itor);
+	}
+	void minusNModelRects(int index)
+	{
+		assert(m_nModels_Rects.size()>index);
+		vector<Rect>::iterator itor = m_nModels_Rects.begin()+index;
+		m_nModels_Rects.erase(itor);
 	}
 	void minusNModelSearchRects(int index)
 	{
@@ -205,24 +267,23 @@ public:
 		m_nModels_SearchRects.erase(itor);
 	}
 
-
 	void writeModel (FileStorage& fs) const
 	{
 		//FileStorage fs(filename, FileStorage::WRITE);
 		fs<<"{";
 		fs<<"describe"<<getDescribe();
-		fs<<"cameraID"<<m_cameraID;
-		fs<<"SearchRect"<<Search_rect;
+		fs<<"cameraID"<<getCameraID();
+		fs<<"SearchRect"<<getSearchrect();
 
-		fs<<"directModel"<<m_dModel;
-		fs<<"directModel_Mask"<<m_dModel_Mask;
-		fs<<"directModel_Rect"<<m_dModel_rect;
-		fs<<"directModel_SearchRect"<<m_dModel_SearchRect;
+		fs<<"directModel"<<getDModel();
+		fs<<"directModel_Mask"<<getDModelMask();
+		fs<<"directModel_Rect"<<getDModelRect();
+		fs<<"directModel_SearchRect"<<getDModelSearchRect();
 
-		fs<<"directModel2"<<m_dModel2;
-		fs<<"directModel_Mask2"<<m_dModel_Mask2;
-		fs<<"directModel_Rect2"<<m_dModel_rect2;
-		fs<<"directModel_SearchRect2"<<m_dModel_SearchRect2;
+		fs<<"directModel2"<<getDModel2();
+		fs<<"directModel_Mask2"<<getDModelMask2();
+		fs<<"directModel_Rect2"<<getDModelRect2();
+		fs<<"directModel_SearchRect2"<<getDModelSearchRect2();
 
 
 
@@ -271,7 +332,7 @@ public:
 
 		Rect SearchRect;
 		node["SearchRect"]>>SearchRect;
-		this->Search_rect=SearchRect;
+		this->setSearchrect(SearchRect);
 
 
 
@@ -291,7 +352,7 @@ public:
 		node["directModel_SearchRect"]>>directModel_SearchRect;
 		this->setDModelSearchRect(directModel_SearchRect);
 
-		
+
 		Mat directModel2;
 		node["directModel2"]>>directModel2;
 		this->setDModel2(directModel2);
@@ -354,9 +415,10 @@ public:
 		}
 	}
 
-	//private:
-	std::string m_Describe;
+private:
+	string m_Describe;
 	int m_cameraID;
+	Rect m_show_Search_rect;
 
 	Mat   m_dModel;
 	Mat   m_dModel_Mask;
@@ -368,8 +430,6 @@ public:
 	Rect  m_dModel_rect2;
 	Rect  m_dModel_SearchRect2;
 
-
-	Rect Search_rect;
 
 	vector<Mat>   m_pModels;
 	vector<Rect>  m_pModels_Rects;
@@ -393,10 +453,11 @@ static void read(const FileNode& node, Model& x, const Model& default_value = Mo
 }
 
 
+
 class ModelManage
 {
 public:
-	ModelManage():m_Describe("defaut name"){};
+	ModelManage():m_Describe("defaut_ModelManage_name"){};
 	~ModelManage(){};
 public:
 	void Init(std::string str,int number)
@@ -418,6 +479,13 @@ public:
 	{
 		m_Describe =des;
 	};
+
+	Model getModel(int index)
+	{
+		assert(m_Models.size()>index);
+		vector<Model>::iterator itor = m_Models.begin()+index;
+		return *itor;
+	}
 	void addOneModel(Model m)
 	{
 		m_Models.push_back(m);
@@ -428,11 +496,11 @@ public:
 		vector<Model>::iterator itor = m_Models.begin()+index;
 		m_Models.erase(itor);
 	}
-	Model getModel(int index)
+	void insertOneModel(Model m,int index)
 	{
 		assert(m_Models.size()>index);
 		vector<Model>::iterator itor = m_Models.begin()+index;
-		return *itor;
+		m_Models.insert(itor,m);
 	}
 
 
@@ -470,9 +538,10 @@ public:
 		this->img = image;
 	}
 public:
-	vector<Model> m_Models;
 	std::string m_Describe;
 	cv::Mat img;
+	std::vector<Model> m_Models;
+
 };
 static void write(FileStorage& fs, const std::string&,  const ModelManage& x)
 {

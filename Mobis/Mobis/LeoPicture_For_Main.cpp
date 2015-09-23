@@ -22,9 +22,9 @@ void LeoPicture_For_Main::Draw(CDC *pDC)
 	{
 		for (int i = 0; i < p_ModelManage->m_Models.size(); i++)
 		{
-			if(ID == p_ModelManage->m_Models[i].m_cameraID)
+			if(ID == p_ModelManage->m_Models[i].getCameraID())
 			{
-				int a = (p_ModelManage->m_Models)[i].Search_rect.width;
+				int a = (p_ModelManage->m_Models)[i].getSearchrect().width;
 				int b = RectRoi.width;
 				if(a==0) a=1;
 				int w = b/a *3/23;
@@ -34,17 +34,17 @@ void LeoPicture_For_Main::Draw(CDC *pDC)
 					w=1;
 
 
-				cv::putText(showMat,(p_ModelManage->m_Models)[i].m_Describe,
-					cv::Point((p_ModelManage->m_Models)[i].Search_rect.x,(p_ModelManage->m_Models)[i].Search_rect.y),FONT_HERSHEY_DUPLEX,1.5,Scalar(0,255,255));
+				cv::putText(showMat,(p_ModelManage->m_Models)[i].getDescribe(),
+					cv::Point((p_ModelManage->m_Models)[i].getSearchrect().x,(p_ModelManage->m_Models)[i].getSearchrect().y),FONT_HERSHEY_DUPLEX,1.5,Scalar(0,255,255));
 				if(states.size()==p_ModelManage->m_Models.size())
 				{
 					if(states[i])
-						cv::rectangle(showMat,(p_ModelManage->m_Models)[i].Search_rect,cv::Scalar(0,255,0),w);
+						cv::rectangle(showMat,(p_ModelManage->m_Models)[i].getSearchrect(),cv::Scalar(0,255,0),w);
 					else
-						cv::rectangle(showMat,(p_ModelManage->m_Models)[i].Search_rect,cv::Scalar(0,0,255),w);
+						cv::rectangle(showMat,(p_ModelManage->m_Models)[i].getSearchrect(),cv::Scalar(0,0,255),w);
 				}
 				else
-					cv::rectangle(showMat,(p_ModelManage->m_Models)[i].Search_rect,cv::Scalar(0,255,255),w);
+					cv::rectangle(showMat,(p_ModelManage->m_Models)[i].getSearchrect(),cv::Scalar(0,255,255),w);
 			}
 
 		}

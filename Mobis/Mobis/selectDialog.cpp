@@ -121,9 +121,9 @@ void selectDialog::myUpdata(bool direct)
 		{
 			m_listctr.InsertItem(i,current_xh.m_Models[i].getDescribe().c_str());
 
-			int CamId = current_xh.m_Models[i].m_cameraID;
-			int num1 = current_xh.m_Models[i].m_pModels.size();
-			int num2 = current_xh.m_Models[i].m_nModels.size();
+			int CamId = current_xh.m_Models[i].getCameraID();
+			int num1 = current_xh.m_Models[i].getPModel_v().size();
+			int num2 = current_xh.m_Models[i].getNModel_v().size();
 			cv::Rect rect = current_xh.m_Models[i].getDModelRect();
 			CString str0;
 			str0.Format("%d",CamId);

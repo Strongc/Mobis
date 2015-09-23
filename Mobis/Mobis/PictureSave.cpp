@@ -491,7 +491,7 @@ int PictureSave::translatePic(Mat &LargeImg,Mat &SmallImg )
 	int modelNum = m_ModelManage->m_Models.size();
 	for (int i = 0; i < modelNum; i++)
 	{
-		Mat roi(LargeImg,m_ModelManage->m_Models[i].Search_rect);
+		Mat roi(LargeImg,m_ModelManage->m_Models[i].getSearchrect());
 		imgs.push_back(roi);
 	}
 	All2One(imgs,SmallImg);

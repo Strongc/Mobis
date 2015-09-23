@@ -478,10 +478,10 @@ unsigned CMobisDlg:: CheckThread(void*params)
 				//检测是否有图像存在////////////////////////////////
 				Model c_model =pCMobisDlg->CurrentXinghao.m_Models[i];
 				Mat image; 
-				if(c_model.m_cameraID>pCMobisDlg->workPool_imgs.size())  //防止型号所需的CamId，在软件中不存在。防止下面数组越界
+				if(c_model.getCameraID()>pCMobisDlg->workPool_imgs.size())  //防止型号所需的CamId，在软件中不存在。防止下面数组越界
 					continue;
-				if(!pCMobisDlg->workPool_imgs[c_model.m_cameraID].empty()) //如果没有图像就不处理
-					image = pCMobisDlg->workPool_imgs[c_model.m_cameraID];
+				if(!pCMobisDlg->workPool_imgs[c_model.getCameraID()].empty()) //如果没有图像就不处理
+					image = pCMobisDlg->workPool_imgs[c_model.getCameraID()];
 				else 
 					continue;
 				//if(c_model.m_cameraID==0)
@@ -510,7 +510,7 @@ unsigned CMobisDlg:: CheckThread(void*params)
 				HDC hDC=pdc->GetSafeHdc();	
 
 
-				Mat roi(image,pCMobisDlg->CurrentXinghao.m_Models[i].Search_rect);
+				Mat roi(image,pCMobisDlg->CurrentXinghao.m_Models[i].getSearchrect());
 				IplImage *img = &(IplImage)roi;
 
 				CvvImage iimg;			//创建一个CvvImage对象

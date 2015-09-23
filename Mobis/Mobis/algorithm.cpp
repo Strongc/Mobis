@@ -127,7 +127,7 @@ bool myAlgorithm_ncc::templateMatching(cv::Mat &image)
 #endif
 
 
-		int pnum = p_model->m_Models[i].m_pModels.size(); 
+		int pnum = p_model->m_Models[i].getPModel_v().size(); 
 		result[i].p_results.resize(pnum);
 		for (int j = 0; j < pnum; j++)
 		{
@@ -138,7 +138,7 @@ bool myAlgorithm_ncc::templateMatching(cv::Mat &image)
 			cv::matchTemplate(pSearchRegion,p_model->m_Models[i].getPModel(j),result[i].p_results[j],CV_TM_CCOEFF_NORMED);
 			//histMatchTemplate(checkRegion,p_model->m_Models[i].m_positiveModel[j],result[i].p_results[j]);
 		}
-		int nnum = p_model->m_Models[i].m_nModels.size();
+		int nnum = p_model->m_Models[i].getNModel_v().size();
 		result[i].n_results.resize(nnum);
 		for (int j = 0; j <nnum; j++)
 		{
@@ -152,7 +152,7 @@ bool myAlgorithm_ncc::templateMatching(cv::Mat &image)
 
 		double pmax = -1;
 		cv::Point2i pmax_pt(0,0);
-		for (int j = 0; j < p_model->m_Models[i].m_pModels.size(); j++)
+		for (int j = 0; j < p_model->m_Models[i].getPModel_v().size(); j++)
 		{
 			double maxValue;
 			cv::Point2i maxPt;
@@ -170,7 +170,7 @@ bool myAlgorithm_ncc::templateMatching(cv::Mat &image)
 
 		double nmax = -1;
 		cv::Point2i nmax_pt(0,0);
-		for (int j = 0; j < p_model->m_Models[i].m_nModels.size(); j++)
+		for (int j = 0; j < p_model->m_Models[i].getNModel_v().size(); j++)
 		{
 			double maxValue;
 			cv::Point2i maxPt;
@@ -267,8 +267,8 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 	int maxCamID=-1;
 	for (int i = 0; i < modelNum; i++)
 	{
-		if(maxCamID<p_model->m_Models[i].m_cameraID)
-			maxCamID = 	p_model->m_Models[i].m_cameraID;
+		if(maxCamID<p_model->m_Models[i].getCameraID())
+			maxCamID = 	p_model->m_Models[i].getCameraID();
 	}
 	//assert((maxCamID+1)<=images.size());
 
@@ -285,7 +285,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 		Mat image;
 		if((maxCamID+1)<=images.size())
 		{
-			image =images[c_model.m_cameraID];;
+			image =images[c_model.getCameraID()];;
 			if(image.empty())
 			{
 				//MessageBoxA("不存在图像供模型 检测");
@@ -385,7 +385,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 #endif
 
 
-		int pnum = p_model->m_Models[i].m_pModels.size(); 
+		int pnum = p_model->m_Models[i].getPModel_v().size(); 
 		result[i].p_results.resize(pnum);
 		for (int j = 0; j < pnum; j++)
 		{
@@ -397,7 +397,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 			cv::matchTemplate(pSearchRegion,p_model->m_Models[i].getPModel(j),result[i].p_results[j],CV_TM_CCOEFF_NORMED);
 			//histMatchTemplate(pSearchRegion,p_model->m_Models[i].getPModel(j),result[i].p_results[j]);
 		}
-		int nnum = p_model->m_Models[i].m_nModels.size();
+		int nnum = p_model->m_Models[i].getNModel_v().size();
 		result[i].n_results.resize(nnum);
 		for (int j = 0; j <nnum; j++)
 		{
@@ -412,7 +412,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 
 		double pmax = -1;
 		cv::Point2i pmax_pt(0,0);
-		for (int j = 0; j < p_model->m_Models[i].m_pModels.size(); j++)
+		for (int j = 0; j < p_model->m_Models[i].getPModel_v().size(); j++)
 		{
 			double maxValue;
 			cv::Point2i maxPt;
@@ -430,7 +430,7 @@ bool myAlgorithm_ncc::templateMatching(vector<cv::Mat> images)
 
 		double nmax = -1;
 		cv::Point2i nmax_pt(0,0);
-		for (int j = 0; j < p_model->m_Models[i].m_nModels.size(); j++)
+		for (int j = 0; j < p_model->m_Models[i].getNModel_v().size(); j++)
 		{
 			double maxValue;
 			cv::Point2i maxPt;

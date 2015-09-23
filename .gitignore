@@ -5,7 +5,9 @@
 *.suo
 *.user
 *.sln.docstates
- 
+
+
+
 # Build results
  
 [Dd]ebug/
@@ -49,6 +51,7 @@ build/
  
 # Visual C++ cache files
 ipch/
+test/ 
 *.aps
 *.ncb
 *.opensdf
