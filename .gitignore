@@ -51,7 +51,7 @@ build/
  
 # Visual C++ cache files
 ipch/
-test/ 
+test/
 *.aps
 *.ncb
 *.opensdf
