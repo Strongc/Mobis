@@ -162,6 +162,7 @@ BEGIN_MESSAGE_MAP(addModel2, CDialogEx)
 	ON_MESSAGE(WM_ZOOMCTRL_LDCLICK,OnMessage_ZoomPicture_add) 
 	ON_MESSAGE(WM_ZOOMCTRL_RCLICK,OnMessage_ZoomPicture_cancel) 
 	ON_BN_CLICKED(IDC_CHOOSE_PIC, &addModel2::OnBnClickedChoosePic)
+
 	ON_CBN_SELCHANGE(IDC_CameraID, &addModel2::OnSelchangeCameraid)
 	ON_EN_CHANGE(IDC_EDIT2, &addModel2::OnChangeEdit2)
 	ON_BN_CLICKED(IDC_CHECK_LockCamera, &addModel2::OnClickedCheckLockcamera)

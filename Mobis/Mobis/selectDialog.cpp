@@ -137,7 +137,6 @@ void selectDialog::myUpdata(bool direct)
 			m_listctr.SetItemText(i,2,str1);
 			m_listctr.SetItemText(i,3,str2);
 			m_listctr.SetItemText(i,4,str3);
-
 		}
 
 		m_listctr.SetRedraw(TRUE);	
@@ -363,7 +362,7 @@ LRESULT selectDialog::camera_buf_ready(WPARAM wParam, LPARAM lParam)
 void selectDialog::OnClickedCheckLock()
 {
 	UpdateData();
-	if(m_isCameraLock)//相机锁定，图像不跟新
+	if(m_isCameraLock)//相机锁定，图像不更新
 	{
 		KillTimer(1);        //关闭定时器1。
 	}

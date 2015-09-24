@@ -36,9 +36,9 @@ public:
 	vector<ModelManage>*xinghaos; 
 	int m_pos;
 	//某型号所需数据
-	CListCtrl m_listctr;
 	CString m_curren_name;
 	int m_current_num;
+	CListCtrl m_listctr;
 	ModelManage current_xh;
 
 	BOOL m_isCameraLock;
@@ -60,15 +60,11 @@ public:
 	afx_msg void OnBnClickedSave();			//保存当前型号  
 	afx_msg void OnBnClickedOk();			//退出编辑
 
-	afx_msg void OnClickedCheckLock();		//图像锁定，相机不跟新
+	afx_msg void OnClickedCheckLock();		//图像锁定，相机不更新
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 
 	void myUpdata(bool direct=true); //更新型号列表框、更新型号名称及螺钉数量编辑框、更新模型列表框
 	LRESULT camera_buf_ready(WPARAM wParam, LPARAM lParam);
-
-
-
-
 
 };
